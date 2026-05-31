@@ -1993,32 +1993,72 @@
 
   function formatPostFormulasToHTML(formulaText) {
     if (!formulaText) return '';
-    const sections = formulaText.split(/(?=Core Angle:|Hook Example:|Text Blueprint:|Copy\/Visual Blueprint:|Visual Focal Point:|Main Headline Hook:|Body Copy:|Headline Hook:|\d\.)/i);
+    
+    const lines = formulaText.split(/\r?\n/);
     let html = '<div style="display: flex; flex-direction: column; gap: 12px; margin-top: 4px;">';
     
-    sections.forEach(sec => {
-      let cleanSec = sec.trim();
-      if (!cleanSec) return;
-      
-      const lower = cleanSec.toLowerCase();
-      if (lower.startsWith('core angle:') || lower.startsWith('visual focal point:')) {
-        html += `<div style="font-weight: 700; color: var(--text-primary); margin-top: 6px; font-size: 13px;">${cleanSec}</div>`;
-      } else if (lower.startsWith('hook example:') || lower.startsWith('main headline hook:') || lower.startsWith('headline hook:')) {
-        html += `<div style="font-style: italic; background: rgba(124, 58, 237, 0.05); padding: 8px 12px; border-left: 3px solid var(--accent-purple); border-radius: 3px; margin: 4px 0; color: var(--text-primary);">${cleanSec}</div>`;
-      } else if (lower.startsWith('text blueprint:') || lower.startsWith('copy/visual blueprint:') || lower.startsWith('body copy:') || lower.startsWith('body copy & offline cta blueprint:')) {
-        let code = cleanSec;
-        const headingMatch = cleanSec.match(/^(text blueprint:|copy\/visual blueprint:|body copy & offline cta blueprint:|body copy:)/i);
-        if (headingMatch) {
-          code = cleanSec.substring(headingMatch[0].length).trim();
-          html += `<div style="font-weight: 600; font-size: 11px; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 2px;">Blueprint</div>`;
-        }
+    let currentBlueprintLines = [];
+    let inBlueprint = false;
+    
+    const flushBlueprint = () => {
+      if (currentBlueprintLines.length > 0) {
+        const code = currentBlueprintLines.join('\n').trim();
         html += `<div class="post-formula-box">${code}</div>`;
+        currentBlueprintLines = [];
+      }
+      inBlueprint = false;
+    };
+
+    const coreAngleRegex = /^(?:[-*•\s\d\.]*\s*)?\*?\*?(?:the\s+)?(?:core angle|visual focal point)/i;
+    const hookRegex = /^(?:[-*•\s\d\.]*\s*)?\*?\*?(?:hook example|headline hook|main headline hook|hook)\*?\*?:/i;
+    const blueprintRegex = /^(?:[-*•\s\d\.]*\s*)?\*?\*?(?:text blueprint|copy\/visual blueprint|body copy & offline cta blueprint|body copy|blueprint)\*?\*?:/i;
+    
+    lines.forEach(line => {
+      const cleanLine = line.trim();
+      if (!cleanLine) {
+        if (inBlueprint) {
+          currentBlueprintLines.push('');
+        }
+        return;
+      }
+      
+      const isCoreAngle = coreAngleRegex.test(cleanLine);
+      const isHook = hookRegex.test(cleanLine);
+      const isBlueprintHeader = blueprintRegex.test(cleanLine);
+      
+      if (isCoreAngle) {
+        flushBlueprint();
+        let content = cleanLine;
+        content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        html += `<div style="font-weight: 700; color: var(--text-primary); margin-top: 6px; font-size: 13px;">${content}</div>`;
+      } else if (isHook) {
+        flushBlueprint();
+        let content = cleanLine;
+        // Clean up leading list/bullet markers
+        content = content.replace(/^[-*•\s\d\.]+\s*/, '');
+        content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        html += `<div style="font-style: italic; background: rgba(124, 58, 237, 0.05); padding: 8px 12px; border-left: 3px solid var(--accent-purple); border-radius: 3px; margin: 4px 0; color: var(--text-primary);">${content}</div>`;
+      } else if (isBlueprintHeader) {
+        flushBlueprint();
+        inBlueprint = true;
+        html += `<div style="font-weight: 600; font-size: 11px; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 2px; margin-top: 4px;">Blueprint</div>`;
+        
+        // Check if there is trailing content on the same line
+        const match = cleanLine.match(/^(?:[-*•\s\d\.]*\s*)?\*?\*?(?:text blueprint|copy\/visual blueprint|body copy & offline cta blueprint|body copy|blueprint)\*?\*?:?\s*(.*)/i);
+        if (match && match[1]) {
+          currentBlueprintLines.push(match[1].trim());
+        }
       } else {
-        cleanSec = cleanSec.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        html += `<div style="line-height: 1.5; margin-bottom: 2px;">${cleanSec}</div>`;
+        if (inBlueprint) {
+          currentBlueprintLines.push(cleanLine);
+        } else {
+          let content = cleanLine.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+          html += `<div style="line-height: 1.5; margin-bottom: 2px;">${content}</div>`;
+        }
       }
     });
     
+    flushBlueprint();
     html += '</div>';
     return html;
   }
