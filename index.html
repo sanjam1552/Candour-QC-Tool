@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VisiQC // AI Design Director & Quality Control Suite</title>
+  <!-- Poppins fonts (matching deck) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Material Symbols for sleek UI icons -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  
+  <!-- Modular Glassmorphic CSS Links -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/terminal.css">
+  <link rel="stylesheet" href="css/modals.css">
+  <link rel="stylesheet" href="css/scanner.css">
+  <link rel="stylesheet" href="css/editor.css">
+</head>
+<body>
+
+  <!-- Background grid spotlight follow -->
+  <div id="bg-spotlight" class="bg-spotlight"></div>
+  <div id="bg-grid-glow" class="bg-grid-glow">
+    <div id="grid-glow-spotlight" class="grid-glow-spotlight"></div>
+  </div>
+
+  <div class="app-container">
+    
+    <!-- Left Sidebar: Brand & Workspace Switcher -->
+    <aside class="sidebar">
+      <!-- Sidebar Header -->
+      <div class="sidebar-header" style="background: var(--bg-secondary); position: relative; overflow: hidden; padding: 0 24px; height: 96px; display: flex; align-items: center;">
+        <div class="header-grid-bg" style="position: absolute; inset: 0; background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px); background-size: 16px 16px; opacity: 0.15; pointer-events: none;"></div>
+        <div class="brand" style="position: relative; z-index: 2; display: flex; align-items: center;">
+          <div class="logo-slashes" style="font-family: 'Poppins', sans-serif; font-size: 2.0rem; font-weight: 800; color: var(--accent-blue); letter-spacing: -2px; line-height: 1; margin-right: 8px;">//</div>
+          <div class="brand-text" style="border-left: 3px solid var(--accent-purple); padding-left: 14px;">
+            <h1 style="font-family: 'Poppins', sans-serif; font-size: 1.6rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--text-primary); line-height: 1; margin: 0;">VisiQC</h1>
+            <span class="tagline" style="font-family: 'Poppins', sans-serif; font-size: 0.72rem; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--text-secondary); display: block; margin-top: 4px;">Design Director Studio</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Workspace Selector Dropdowns -->
+      <div class="workspace-selector-container">
+        <div class="form-group" style="gap: 4px;">
+          <div class="selector-label-group">
+            <span>Select Client</span>
+            <div style="display: flex; gap: 4px; align-items: center;">
+              <button type="button" id="btnOpenClientModal" class="btn-add-inline" title="Add Client">
+                <span class="material-symbols-outlined" style="font-size: 14px;">add_box</span>
+                Brand
+              </button>
+              <button type="button" id="btnDeleteClient" class="btn-add-inline" title="Delete Active Brand" style="color: var(--color-danger); display: none;">
+                <span class="material-symbols-outlined" style="font-size: 14px;">delete</span>
+              </button>
+            </div>
+          </div>
+          <select id="clientSelector" class="workspace-select">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+        <div class="form-group" style="gap: 4px;">
+          <div class="selector-label-group">
+            <span>Select Project</span>
+            <div style="display: flex; gap: 4px; align-items: center;">
+              <button type="button" id="btnOpenProjectModal" class="btn-add-inline" title="Add Project">
+                <span class="material-symbols-outlined" style="font-size: 14px;">add_box</span>
+                Project
+              </button>
+              <button type="button" id="btnDeleteProject" class="btn-add-inline" title="Delete Active Project" style="color: var(--color-danger); display: none;">
+                <span class="material-symbols-outlined" style="font-size: 14px;">delete</span>
+              </button>
+            </div>
+          </div>
+          <select id="projectSelector" class="workspace-select">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+      </div>
+
+      <!-- Project Desk Widget (Collapsible Brand book summary + Design Thinking references) -->
+      <div class="project-desk-section">
+        <div class="project-desk-title">
+          <span class="material-symbols-outlined" style="font-size: 16px; color: var(--accent-purple);">space_dashboard</span>
+          <span>Project Focus</span>
+        </div>
+        <p class="project-desk-desc" id="projectDescText">General console for running quick ad audits.</p>
+        
+        <div class="project-desk-title" style="margin-top: 8px;">
+          <span class="material-symbols-outlined" style="font-size: 16px; color: var(--accent-pink);">psychology</span>
+          <span>Design Thinking Refs</span>
+        </div>
+        <div class="references-list" id="referencesList">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- History List Section -->
+      <div class="history-section">
+        <div class="section-title-container">
+          <span class="material-symbols-outlined section-icon">history</span>
+          <h2>Project Audit History</h2>
+        </div>
+        <div class="history-list" id="historyList">
+          <!-- Populated by JS -->
+          <div class="no-history-state">
+            <p>No designs evaluated yet</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Configurations Button in Footer -->
+      <div class="sidebar-footer">
+        <button id="settingsBtn" class="btn btn-secondary btn-full">
+          <span class="material-symbols-outlined">settings</span>
+          Configure Engine
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Top Action Bar -->
+      <header class="top-bar">
+        <div class="top-bar-brand-group">
+          <div class="ai-core-orb">
+            <div class="orb-inner">
+              <div class="orb-light light-1"></div>
+              <div class="orb-light light-2"></div>
+              <div class="orb-light light-3"></div>
+              <div class="orb-light light-4"></div>
+            </div>
+            <div class="orb-glass"></div>
+            <div class="orb-pulse"></div>
+          </div>
+          
+          <div class="top-bar-title">
+            <h2>Candour Quality Control Console</h2>
+            <p class="status-indicator"><span class="pulse-dot active" id="apiStatusDot"></span> <span id="apiStatusText">Engine ready. Key required.</span></p>
+          </div>
+        </div>
+        
+        <div class="top-bar-controls">
+          <div class="control-group">
+            <label for="platformSelector">Target Format</label>
+            <select id="platformSelector">
+              <option value="auto">Auto-Detect Platform</option>
+              <option value="instagram_post">Instagram Square (1:1)</option>
+              <option value="instagram_story">Instagram Story / Reel (9:16)</option>
+              <option value="linkedin_creative">LinkedIn Image Ad</option>
+              <option value="youtube_thumbnail">YouTube Thumbnail</option>
+              <option value="banner_ad">Digital Banner Ad</option>
+              <option value="ui_screen">UI/UX App Screen</option>
+              <option value="presentation_slide">Presentation Slide (16:9)</option>
+              <option value="packaging">Packaging Design</option>
+              <option value="print_poster">Print Poster / Magazine Ad</option>
+            </select>
+          </div>
+          
+          <div class="control-group">
+            <label for="modelSelector">Analysis Engine</label>
+            <select id="modelSelector">
+              <option value="gemini-2.5-flash">Gemini 2.5 Flash (Cheapest/Fast)</option>
+              <option value="gemini-2.5-pro">Gemini 2.5 Pro (Ultra Quality)</option>
+              <option value="gemini-1.5-flash">Gemini 1.5 Flash (Legacy Fast)</option>
+            </select>
+          </div>
+        </div>
+      </header>
+
+      <!-- Animated SVG color waves strip -->
+      <div class="workspace-header-row">
+        <div class="top-bar-waves">
+          <svg class="wave-svg" viewBox="0 0 1440 96" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="wave-grad-blue" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#00f3ff" stop-opacity="0.8"/>
+                <stop offset="50%" stop-color="#3b42ff" stop-opacity="0.95"/>
+                <stop offset="100%" stop-color="#00f3ff" stop-opacity="0.2"/>
+              </linearGradient>
+              <linearGradient id="wave-grad-magenta" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#ff00a0" stop-opacity="0.1"/>
+                <stop offset="40%" stop-color="#ff00a0" stop-opacity="0.95"/>
+                <stop offset="85%" stop-color="#7c3aed" stop-opacity="0.9"/>
+                <stop offset="100%" stop-color="#ff00a0" stop-opacity="0.2"/>
+              </linearGradient>
+              <linearGradient id="wave-grad-orange" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#ffaa00" stop-opacity="0.95"/>
+                <stop offset="35%" stop-color="#ff4500" stop-opacity="0.9"/>
+                <stop offset="70%" stop-color="#ff00a0" stop-opacity="0.2"/>
+                <stop offset="100%" stop-color="#ff4500" stop-opacity="0"/>
+              </linearGradient>
+              <linearGradient id="wave-grad-purple" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.4"/>
+                <stop offset="50%" stop-color="#4f46e5" stop-opacity="0.85"/>
+                <stop offset="100%" stop-color="#06050c" stop-opacity="0.1"/>
+              </linearGradient>
+              <filter id="svg-glow">
+                <feGaussianBlur stdDeviation="15" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+            <path class="wave-path path-purple" d="M -100 48 Q 200 10, 500 48 T 1100 48 T 1600 20 L 1600 96 L -100 96 Z" fill="url(#wave-grad-purple)" filter="url(#svg-glow)"/>
+            <path class="wave-path path-blue" d="M -100 70 Q 300 30, 700 80 T 1300 60 T 1600 85" fill="none" stroke="url(#wave-grad-blue)" stroke-width="12" stroke-linecap="round" filter="url(#svg-glow)"/>
+            <path class="wave-path path-magenta" d="M -100 35 Q 400 90, 800 20 T 1200 65 T 1600 40" fill="none" stroke="url(#wave-grad-magenta)" stroke-width="14" stroke-linecap="round" filter="url(#svg-glow)"/>
+            <path class="wave-path path-orange" d="M -100 30 Q 150 -10, 450 60 T 950 45" fill="none" stroke="url(#wave-grad-orange)" stroke-width="10" stroke-linecap="round" filter="url(#svg-glow)"/>
+          </svg>
+        </div>
+        
+        <!-- Tabs toggles split -->
+        <div class="left-tabs-group">
+          <button class="panel-tab active" id="tabVisual">
+            <span class="material-symbols-outlined">image</span>
+            Visual Audit
+          </button>
+          <button class="panel-tab" id="tabText">
+            <span class="material-symbols-outlined">edit_note</span>
+            Copy & Tone Editor
+          </button>
+          <button class="panel-tab" id="tabResearch" title="Launch B2B Trend Research">
+            <span class="material-symbols-outlined">explore</span>
+            B2B Trends
+          </button>
+          <button class="panel-tab" id="tabCreator" title="Launch AI Image Creator">
+            <span class="material-symbols-outlined">draw</span>
+            AI Creator
+          </button>
+        </div>
+        
+        <div class="right-report-group">
+          <h3>Audit Reports & QC Results</h3>
+          <span class="badge" id="qcScoreBadge">READY</span>
+        </div>
+      </div>
+
+      <!-- Dashboard Workspace panels grid -->
+      <div class="workspace-grid">
+        
+        <!-- Left Panel: Creative Upload & Visual Feedback -->
+        <section class="workspace-panel panel-left">
+
+          <!-- Tab 1: Visual Audit Content -->
+          <div id="visualTabContent" class="tab-content-wrapper" style="display: flex; flex-direction: column; flex-grow: 1; overflow: hidden;">
+            <div class="upload-container" id="dropZone">
+              <input type="file" id="fileInput" accept="image/*" style="display: none;">
+              
+              <!-- Default Drop placeholder State -->
+              <div class="upload-placeholder" id="uploadPlaceholder">
+                <div class="upload-icon-wrapper">
+                  <span class="material-symbols-outlined upload-cloud">cloud_upload</span>
+                  <div class="pulse-ring"></div>
+                </div>
+                <h4>Drag & drop creative asset here</h4>
+                <p>Supports PNG, JPG, JPEG, or WebP formats</p>
+                <button class="btn btn-primary btn-sm" id="browseBtn">Browse Local Files</button>
+              </div>
+
+              <!-- Preview Image rendering State -->
+              <div class="preview-container hidden" id="previewContainer">
+                <div class="image-wrapper">
+                  <img id="previewImage" src="" alt="Creative Payload">
+                  <div class="overlay-corners">
+                    <div class="corner top-left"></div>
+                    <div class="corner top-right"></div>
+                    <div class="corner bottom-left"></div>
+                    <div class="corner bottom-right"></div>
+                  </div>
+                  <div class="overlay-grid"></div>
+                  <div class="ai-scanner-overlay" id="aiScannerOverlay">
+                    <canvas id="aiNeuralCanvas" class="ai-neural-canvas"></canvas>
+                    <div class="holographic-sweep"></div>
+                    <div class="holographic-grid"></div>
+                    <div class="ai-detections-container" id="aiDetectionsContainer"></div>
+                    <div class="ai-reticles-container" id="aiReticlesContainer"></div>
+                  </div>
+                  <div class="live-ticker hidden" id="liveTicker">
+                    <span class="ticker-prefix">> SYSTEM SCAN:</span>
+                    <span class="ticker-text" id="tickerText">Analyzing composition balance...</span>
+                  </div>
+                </div>
+                
+                <div class="preview-info-bar">
+                  <div class="img-meta">
+                    <span class="material-symbols-outlined">image</span>
+                    <span id="imgName">creative.png</span>
+                    <span class="meta-dot"></span>
+                    <span id="imgDimensions">0 x 0 px</span>
+                  </div>
+                  <button class="btn-icon text-danger" id="removeImgBtn" title="Remove Creative">
+                    <span class="material-symbols-outlined">delete</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel-actions">
+              <button class="btn btn-danger btn-outline" id="resetBtn" disabled style="flex-grow: 1;">
+                <span class="material-symbols-outlined">restart_alt</span>
+                Reset
+              </button>
+              <button class="btn btn-success" id="analyzeBtn" disabled style="flex-grow: 2;">
+                <span class="material-symbols-outlined">analytics</span>
+                Analyze & Run Audit
+              </button>
+            </div>
+          </div>
+
+          <!-- Tab 2: AI Creator Content -->
+          <div id="creatorTabContent" class="tab-content-wrapper hidden" style="display: grid; grid-template-columns: 1.25fr 1fr; flex-grow: 1; overflow: hidden; height: 100%;">
+            <!-- Canvas Viewport (Left Side) -->
+            <div class="studio-viewport" style="border-right: 1px solid var(--border-color); height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; box-sizing: border-box; background: radial-gradient(circle at center, rgba(124, 58, 237, 0.04) 0%, rgba(255, 255, 255, 0) 100%); background-image: linear-gradient(rgba(27, 42, 207, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(27, 42, 207, 0.03) 1px, transparent 1px); background-size: 20px 20px;">
+              <div class="canvas-container" style="flex-grow: 1; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                <canvas id="creatorCanvas" style="max-width: 100%; max-height: 100%; object-fit: contain; transition: all 0.3s ease;"></canvas>
+                
+                <!-- HUD Overlay when empty -->
+                <div id="creatorHUD" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 3; pointer-events: none; transition: opacity 0.5s ease;">
+                  <!-- Tech Rings -->
+                  <div class="hud-ring-outer"></div>
+                  <div class="hud-ring-inner"></div>
+                  <div class="hud-core-glow"></div>
+                  
+                  <!-- HUD Readout -->
+                  <div class="hud-readout" style="margin-top: 24px; text-align: center; font-family: var(--font-mono); color: var(--accent-purple); letter-spacing: 0.15em; font-size: 11px;">
+                    <div style="display: flex; align-items: center; gap: 8px; justify-content: center;">
+                      <span class="hud-pulse-dot"></span>
+                      <span>AI SYNTHESIZER READY</span>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 9px; margin-top: 8px; letter-spacing: 0.05em; text-transform: uppercase;">Describe your concept & select format to create</p>
+                  </div>
+                </div>
+              </div>
+              <!-- Canvas Info Overlay -->
+              <div class="canvas-dims-info" style="margin-top: 12px; color: var(--text-secondary); font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.05em; background: rgba(255,255,255,0.6); border: 1px solid var(--border-color); padding: 4px 10px; border-radius: 20px; backdrop-filter: var(--glass-blur);">
+                Canvas size: <span id="creatorCanvasDims">1080 x 1080 px</span>
+              </div>
+            </div>
+
+            <!-- Controls Sidebar (Right Side) -->
+            <div class="studio-controls-sidebar" style="height: 100%; display: flex; flex-direction: column; padding: 24px; overflow-y: auto; background: rgba(255, 255, 255, 0.02); gap: 16px; box-sizing: border-box;">
+              <div class="control-card">
+                <h4>Format Configurator</h4>
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label for="creatorTargetFormat" style="font-size: 10px; text-transform: uppercase; font-weight: 700; color: var(--text-secondary); margin-bottom: 4px; display: block;">Target Social Format</label>
+                  <select id="creatorTargetFormat" class="studio-select" style="width: 100%;">
+                    <option value="1080x1080">Instagram Square (1080 x 1080 // 1:1)</option>
+                    <option value="1080x1350">Instagram Portrait / Reels (1080 x 1350 // 4:5)</option>
+                    <option value="1350x1080">Landscape Social / Ad (1350 x 1080 // 5:4)</option>
+                    <option value="1080x1920">Instagram Story / Reel (1080 x 1920 // 9:16)</option>
+                    <option value="1200x630">LinkedIn / Meta Link (1200 x 630 // 1.91:1)</option>
+                    <option value="1280x720">YouTube Thumbnail (1280 x 720 // 16:9)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="control-card" style="flex-grow: 1; display: flex; flex-direction: column; gap: 10px;">
+                <h4>Creative Concept Prompter</h4>
+                <p class="tab-desc" style="font-size: 11px; color: var(--text-secondary); line-height: 1.4; margin: 0;">Generate a raw visual asset in the exact dimensions using Stable Diffusion AI (Pollinations network).</p>
+                <div class="form-group" style="flex-grow: 1; display: flex; flex-direction: column; gap: 4px; margin-bottom: 0;">
+                  <label for="creatorPromptText" style="font-size: 10px; text-transform: uppercase; font-weight: 700; color: var(--text-secondary);">Describe Your Image</label>
+                  <textarea id="creatorPromptText" style="flex-grow: 1; resize: none; min-height: 100px; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); background: var(--bg-input); color: var(--text-primary); outline: none; font-family: var(--font-body); font-size: 12px; line-height: 1.4;" placeholder="e.g. 'A high-contrast vertical advertisement for Minecraft summer school camp...'"></textarea>
+                </div>
+                <button class="btn btn-primary btn-full" id="btnGenerateAsset" type="button" style="margin-top: 10px;">
+                  <span class="material-symbols-outlined">auto_awesome</span>
+                  Generate Visual Asset
+                </button>
+                <div id="creatorStatusText" class="studio-status hidden" style="margin-top: 10px;">Generating image...</div>
+              </div>
+              
+              <!-- Action Buttons Row in Sidebar Footer -->
+              <div style="display: flex; gap: 8px; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border-color); flex-shrink: 0;">
+                <button class="btn btn-secondary" id="btnExportCreatorDesign" type="button" style="flex: 1; padding: 8px 12px; font-size: 12px;">Export Design</button>
+                <button class="btn btn-primary" id="btnSetCreatorAsActive" type="button" style="flex: 1.5; padding: 8px 12px; font-size: 12px;">Set as Active Creative</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 3: Copy Editor Content -->
+          <div id="textTabContent" class="tab-content-wrapper hidden" style="display: flex; flex-direction: column; flex-grow: 1; overflow: hidden;">
+            <div class="copy-editor-container" style="flex-grow: 1; padding: 24px 32px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto;">
+              
+              <!-- AI Content Generator block -->
+              <div class="form-group" style="display: flex; flex-direction: column; gap: 8px; background: rgba(255, 255, 255, 0.01); border: 1px solid var(--border-color); padding: 14px; border-radius: var(--border-radius-md);">
+                <label for="generatorPromptInput" style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-purple); letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px;">
+                  <span class="material-symbols-outlined" style="font-size: 16px; font-variation-settings: 'FILL' 1;">electric_bolt</span>
+                  AI Copy Generator
+                </label>
+                <div style="display: flex; gap: 10px;">
+                  <input type="text" id="generatorPromptInput" style="flex-grow: 1; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); color: var(--text-primary); padding: 8px 12px; font-size: 12px; font-family: var(--font-body); outline: none;" placeholder="E.g., Write a professional B2B email introducing a design feedback tool...">
+                  <button class="btn btn-primary btn-sm" id="btnGenerateText" style="flex-shrink: 0; padding: 8px 16px;">
+                    Generate Copy
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group" style="flex-grow: 1; display: flex; flex-direction: column; gap: 8px;">
+                <label for="rawTextInput" style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em;">Source Text / Ad Copy</label>
+                <textarea id="rawTextInput" style="flex-grow: 1; min-height: 140px; resize: none; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--border-radius-md); color: var(--text-primary); padding: 14px; font-size: 13px; font-family: var(--font-body); outline: none; line-height: 1.5;" placeholder="Paste text here, or use the Generator prompt above to generate a draft first..."></textarea>
+                <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); margin-top: 4px;">
+                  <span id="textCounters">0 words | 0 characters</span>
+                  <span style="cursor: pointer; color: var(--accent-blue); font-weight: 600;" id="btnClearText">Clear Text</span>
+                </div>
+              </div>
+
+              <div class="tone-selection-group" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px;">
+                <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em;">Transform Tone Target</label>
+                <div class="tone-buttons-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                  <button class="btn btn-secondary tone-btn active" data-tone="professional" style="justify-content: flex-start; text-align: left; padding: 10px 14px; font-weight: 500;">
+                    👔 Professional / Formal
+                  </button>
+                  <button class="btn btn-secondary tone-btn" data-tone="friendly" style="justify-content: flex-start; text-align: left; padding: 10px 14px; font-weight: 500;">
+                    💬 Friendly / Informal
+                  </button>
+                  <button class="btn btn-secondary tone-btn" data-tone="persuasive" style="justify-content: flex-start; text-align: left; padding: 10px 14px; font-weight: 500;">
+                    🚀 Persuasive / Marketing
+                  </button>
+                  <button class="btn btn-secondary tone-btn" data-tone="bold" style="justify-content: flex-start; text-align: left; padding: 10px 14px; font-weight: 500;">
+                    ⚡ Bold / Energetic
+                  </button>
+                  <button class="btn btn-secondary tone-btn" data-tone="simple" style="justify-content: flex-start; text-align: left; padding: 10px 14px; font-weight: 500;">
+                    💡 Simple / Concise
+                  </button>
+                  <button class="btn btn-secondary tone-btn" data-tone="empathetic" style="justify-content: flex-start; text-align: left; padding: 10px 14px; font-weight: 500;">
+                    ❤️ Empathetic / Warm
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel-actions">
+              <button class="btn btn-danger btn-outline" id="btnResetText" disabled>
+                <span class="material-symbols-outlined">restart_alt</span>
+                Reset Copy
+              </button>
+              <button class="btn btn-success" id="btnAnalyzeText" disabled>
+                <span class="material-symbols-outlined">auto_fix_high</span>
+                Audit & Polish Copy
+              </button>
+            </div>
+          </div>
+
+          <!-- Tab 2.5 (Rendered as Tab 3): B2B Trend Research Content -->
+          <div id="researchTabContent" class="tab-content-wrapper hidden" style="display: flex; flex-direction: column; flex-grow: 1; overflow: hidden; height: 100%;">
+            <div class="research-container" style="flex-grow: 1; padding: 24px 32px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto;">
+              
+              <!-- Topic Input and Search block -->
+              <div class="research-input-card" style="display: flex; flex-direction: column; gap: 12px; background: rgba(255, 255, 255, 0.45); border: 1px solid var(--border-glass); padding: 18px 22px; border-radius: var(--border-radius-lg); backdrop-filter: var(--glass-blur);">
+                <h4 style="font-size: 14px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px; margin: 0;">
+                  <span class="material-symbols-outlined" style="color: var(--accent-purple); font-variation-settings: 'FILL' 1;">explore</span>
+                  Multi-Channel Trend Intelligence & Research
+                </h4>
+                <p style="font-size: 11px; color: var(--text-secondary); margin: 0; line-height: 1.4;">
+                  Enter a research topic and target industry to analyze real-time discussions, copy formulas, hashtags, and strategic action plans across LinkedIn, Meta, X (Twitter), and Print Ads.
+                </p>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px;">
+                  <div style="flex: 2; min-width: 250px; display: flex; flex-direction: column; gap: 4px;">
+                    <label for="researchTopicInput" style="font-size: 10px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Research Topic / Keyword</label>
+                    <input type="text" id="researchTopicInput" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); color: var(--text-primary); padding: 10px 14px; font-size: 13px; font-family: var(--font-body); outline: none;" placeholder="e.g. Indian Railways, EV Infrastructure, SaaS Product Marketing...">
+                  </div>
+                  <div style="flex: 1; min-width: 180px; display: flex; flex-direction: column; gap: 4px;">
+                    <label for="researchIndustrySelect" style="font-size: 10px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Target Industry</label>
+                    <select id="researchIndustrySelect" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); color: var(--text-primary); padding: 9px 14px; font-size: 13px; font-family: var(--font-body); outline: none; height: 38px;">
+                      <option value="" disabled selected>-- Select Industry --</option>
+                      <option value="Technology & SaaS">Technology & SaaS</option>
+                      <option value="Healthcare & Life Sciences">Healthcare & Life Sciences</option>
+                      <option value="Finance & Banking">Finance & Banking</option>
+                      <option value="Manufacturing & Industrial">Manufacturing & Industrial</option>
+                      <option value="Retail & E-commerce">Retail & E-commerce</option>
+                      <option value="Energy & Utilities">Energy & Utilities</option>
+                      <option value="Transportation & Logistics">Transportation & Logistics</option>
+                      <option value="Education & EdTech">Education & EdTech</option>
+                      <option value="Real Estate & Construction">Real Estate & Construction</option>
+                      <option value="Professional Services">Professional Services</option>
+                      <option value="other">Other (Specify below...)</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div id="customIndustryContainer" class="hidden" style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+                  <label for="researchCustomIndustry" style="font-size: 10px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Specify Custom Industry</label>
+                  <input type="text" id="researchCustomIndustry" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); color: var(--text-primary); padding: 10px 14px; font-size: 13px; font-family: var(--font-body); outline: none;" placeholder="Enter custom industry sector (e.g. Defense, Agriculture)...">
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; margin-top: 6px;">
+                  <button class="btn btn-primary" id="btnRunResearch" style="padding: 10px 24px;">
+                    <span class="material-symbols-outlined">query_stats</span>
+                    Research Multi-Channel Trends
+                  </button>
+                </div>
+              </div>
+
+              <!-- Loader Console State (Terminal logs) -->
+              <div id="researchLoadingState" class="results-state hidden" style="flex-grow: 1; width: 100%; max-width: 600px; margin: 20px auto; padding: 0;">
+                <div class="terminal-loader" style="width: 100%;">
+                  <div class="terminal-header">
+                    <div class="terminal-dots">
+                      <span class="dot"></span>
+                      <span class="dot"></span>
+                      <span class="dot"></span>
+                    </div>
+                    <div class="terminal-title">visiqc-multichannel-crawler.sh</div>
+                  </div>
+                  <div class="terminal-body" id="researchTerminalLogs" style="font-family: var(--font-mono); font-size: 11px; line-height: 1.5; color: var(--accent-cyan);">
+                    <!-- Dynamically populated -->
+                  </div>
+                  <div class="terminal-footer">
+                    <div class="loader-line"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Success State: Results Dashboard Grid -->
+              <div id="researchResultsDashboard" class="hidden" style="display: flex; flex-direction: column; gap: 20px; width: 100%;">
+                
+                <!-- Topic Header with metadata -->
+                <div class="research-results-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                  <div>
+                    <h3 style="font-size: 18px; font-weight: 700; color: var(--text-primary); margin: 0;">Research Report: <span id="reportTopicTitle" style="color: var(--accent-purple);">Topic</span></h3>
+                    <span style="font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); text-transform: uppercase;" id="reportTimestamp">Generated just now</span>
+                  </div>
+                  <div class="report-meta-badges">
+                    <span class="meta-badge" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); color: #047857;">Live Google Search Grounding</span>
+                    <span class="meta-badge" id="researchModelBadge">Gemini 2.5 Flash</span>
+                  </div>
+                </div>
+
+                <!-- Channel Sub-Tabs -->
+                <div class="channel-tabs-row">
+                  <button class="channel-tab active" data-channel="linkedin">
+                    <span class="material-symbols-outlined" style="font-size: 14px;">hub</span>
+                    LinkedIn
+                  </button>
+                  <button class="channel-tab" data-channel="meta">
+                    <span class="material-symbols-outlined" style="font-size: 14px;">photo_camera</span>
+                    Meta (FB/IG)
+                  </button>
+                  <button class="channel-tab" data-channel="x">
+                    <span class="material-symbols-outlined" style="font-size: 14px;">campaign</span>
+                    X (Twitter)
+                  </button>
+                  <button class="channel-tab" data-channel="print">
+                    <span class="material-symbols-outlined" style="font-size: 14px;">newspaper</span>
+                    Print Ads
+                  </button>
+                </div>
+
+                <!-- Grid 1: LinkedIn -->
+                <div id="gridLinkedIn" class="research-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%;">
+                  <!-- Card 1: Traction Topics -->
+                  <div class="trend-card" style="border-left: 4px solid var(--accent-purple);">
+                    <div class="trend-card-header">
+                      <span class="material-symbols-outlined">trending_up</span>
+                      <h4>High-Traction B2B Topics</h4>
+                    </div>
+                    <div class="trend-card-body" id="researchLinkedInTraction">
+                      <!-- Filled by JS -->
+                    </div>
+                  </div>
+
+                  <!-- Card 2: Post Formulas -->
+                  <div class="trend-card" style="border-left: 4px solid var(--accent-blue);">
+                    <div class="trend-card-header">
+                      <span class="material-symbols-outlined">dynamic_feed</span>
+                      <h4>Top LinkedIn Post Formulas</h4>
+                    </div>
+                    <div class="trend-card-body" id="researchLinkedInFormulas">
+                      <!-- Filled by JS -->
+                    </div>
+                  </div>
+
+                  <!-- Card 3: Trending Keywords -->
+                  <div class="trend-card" style="border-left: 4px solid var(--accent-pink);">
+                    <div class="trend-card-header">
+                      <span class="material-symbols-outlined">tag</span>
+                      <h4>Keywords & Hashtags</h4>
+                    </div>
+                    <div class="trend-card-body" id="researchLinkedInKeywords">
+                      <!-- Filled by JS -->
+                    </div>
+                  </div>
+
+                  <!-- Card 4: Action Plan -->
+                  <div class="trend-card" style="border-left: 4px solid var(--color-success);">
+                    <div class="trend-card-header">
+                      <span class="material-symbols-outlined">checklist</span>
+                      <h4>B2B Content Strategy Recommendations</h4>
+                    </div>
+                    <div class="trend-card-body" id="researchLinkedInPlan">
+                      <!-- Filled by JS -->
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Grid 2: Meta -->
+                <div id="gridMeta" class="research-grid hidden" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%;">
+                  <!-- Card 1: Traction Topics -->
+                  <div class="trend-card" style="border-left: 4px solid var(--accent-purple);">
+                    <div class="trend-card-header">
+                      <span class="material-symbols-outlined">auto_awesome_motion</span>
+                      <h4>Trending Formats & Creative Styles</h4>
+                    </div>
+                    <div class="trend-card-body" id="researchMetaTraction">
+                      <!-- Filled by JS -->
+                    </div>
+                  </div>
+
+                  <!-- Card 2: Formulas -->
+                  <div class="trend-card" style="border-left: 4px solid var(--accent-blue);">
+                    <div class="trend-card-header">
+                      <span class="material-symbols-outlined">smart_display</span>
+                      <h4>Top Ad Copy & Video Hook Formulas</h4>
+                    </div>
+                    <div class="trend-card-body" id="researchMetaFormulas">
+                      <!-- Filled by JS -->
+                    </div>
+                  </div>
+
+                  <!-- Card 3: Keywords -->
+                  <div class="trend-card" style="border-left: 4px solid var(--accent-pink);">
+                    <div class="trend-card-header">
+                      <span class="material-symbols-outlined">interests</span>
+                      <h4>Keywords & Interest Targets</h4>
+                    </div>
+                    <div class="trend-card-body" id="researchMetaKeywords">
+                      <!-- Filled by JS -->
+                    </div>
+                  </div>
+
+                  <!-- Card 4: Plan -->
+                  <div class="trend-card" style="border-left: 4px solid var(--color-success);">
+                    <div class="trend-card-header">
+                      <span class="material-symbols-outlined">campaign</span>
+                      <h4>Meta Ad Campaign Recommendations</h4>
+                    </div>
+                    <div class="trend-card-body" id="researchMetaPlan">
+                      <!-- Filled by JS -->
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Grid 3: X (Twitter) -->
+                <div id="gridX" class="research-grid hidden" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%;">
+                  <!-- Card 1: Traction Topics -->
+                  <div class="trend-card" style="border-left: 4px solid var(--accent-purple);">
+                    <div class="trend-card-header">
+                      <span class="material-symbols-outlined">forum</span>
+                      <h4>Real-time Topics & Debates</h4>
+                    </div>
+                    <div class="trend-card-body" id="researchXTraction">
+                      <!-- Filled by JS -->
+                    </div>
+                  </div>
+
+                  <!-- Card 2: Formulas -->
+                  <div class="trend-card" style="border-left: 4px solid var(--accent-blue);">
+                    <div class="trend-card-header">
+                      <span class="material-symbols-outlined">alternate_email</span>
+                      <h4>Top X Tweet & Thread Formulas</h4>
+                    </div>
+                    <div class="trend-card-body" id="researchXFormulas">
+                      <!-- Filled by JS -->
+                    </div>
+                  </div>
+
+                  <!-- Card 3: Keywords -->
+                  <div class="trend-card" style="border-left: 4px solid var(--accent-pink);">
+                    <div class="trend-card-header">
+                      <span class="material-symbols-outlined">tag</span>
+                      <h4>Trending Hashtags & Keywords</h4>
+                    </div>
+                    <div class="trend-card-body" id="researchXKeywords">
+                      <!-- Filled by JS -->
+                    </div>
+                  </div>
+
+                  <!-- Card 4: Plan -->
+                  <div class="trend-card" style="border-left: 4px solid var(--color-success);">
+                    <div class="trend-card-header">
+                      <span class="material-symbols-outlined">insights</span>
+                      <h4>X Engagement Strategy Recommendations</h4>
+                    </div>
+                    <div class="trend-card-body" id="researchXPlan">
+                      <!-- Filled by JS -->
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Grid 4: Print Ads -->
+                <div id="gridPrint" class="research-grid hidden" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%;">
+                  <!-- Card 1: Traction Topics -->
+                  <div class="trend-card" style="border-left: 4px solid var(--accent-purple);">
+                    <div class="trend-card-header">
+                      <span class="material-symbols-outlined">palette</span>
+                      <h4>Successful Themes & Visual Concepts</h4>
+                    </div>
+                    <div class="trend-card-body" id="researchPrintTraction">
+                      <!-- Filled by JS -->
+                    </div>
+                  </div>
+
+                  <!-- Card 2: Formulas -->
+                  <div class="trend-card" style="border-left: 4px solid var(--accent-blue);">
+                    <div class="trend-card-header">
+                      <span class="material-symbols-outlined">wysiwyg</span>
+                      <h4>Copy Headline & Layout Formulas</h4>
+                    </div>
+                    <div class="trend-card-body" id="researchPrintFormulas">
+                      <!-- Filled by JS -->
+                    </div>
+                  </div>
+
+                  <!-- Card 3: Keywords -->
+                  <div class="trend-card" style="border-left: 4px solid var(--accent-pink);">
+                    <div class="trend-card-header">
+                      <span class="material-symbols-outlined">font_download</span>
+                      <h4>Core Print Keywords & Visual Themes</h4>
+                    </div>
+                    <div class="trend-card-body" id="researchPrintKeywords">
+                      <!-- Filled by JS -->
+                    </div>
+                  </div>
+
+                  <!-- Card 4: Plan -->
+                  <div class="trend-card" style="border-left: 4px solid var(--color-success);">
+                    <div class="trend-card-header">
+                      <span class="material-symbols-outlined">library_books</span>
+                      <h4>Print Ad Campaign Strategy</h4>
+                    </div>
+                    <div class="trend-card-body" id="researchPrintPlan">
+                      <!-- Filled by JS -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- Right Panel: Diagnostic Report Console -->
+        <section class="workspace-panel panel-right">
+          <div class="results-container">
+            
+            <!-- 1. Initial State: Upload prompt -->
+            <div class="results-state" id="stateReady">
+              <div class="state-icon">
+                <span class="material-symbols-outlined logo-large">verified_user</span>
+              </div>
+              <h3>Diagnostic Engine Awaiting Payload</h3>
+              <p>Provide a payload on the left (an image or copy text), select options, and run the audit to generate the Quality Control report.</p>
+            </div>
+
+            <!-- 2. Loading State: Terminal execution log -->
+            <div class="results-state hidden" id="stateAnalyzing">
+              <div class="terminal-loader">
+                <div class="terminal-header">
+                  <div class="terminal-dots">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                  </div>
+                  <div class="terminal-title">VisiQC-Engine-v2.5.sh</div>
+                </div>
+                <div class="terminal-body" id="terminalLogs">
+                  <div class="log-line text-info">[SYSTEM] Initializing creative analysis pipeline...</div>
+                </div>
+                <div class="terminal-body hidden" id="terminalLogsText" style="color: #60a5fa;">
+                  <div class="log-line text-info">[TEXT-ENGINE] Initializing copy auditing pipeline...</div>
+                </div>
+                <div class="terminal-footer">
+                  <div class="loader-line"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Success State: Visual score & parsed sections -->
+            <div class="hidden" id="stateResults">
+              
+              <!-- Report Executive Summary -->
+              <div class="report-summary-card">
+                <div class="score-radial-wrapper">
+                  <svg class="score-svg" viewBox="0 0 120 120">
+                    <circle class="score-circle-bg" cx="60" cy="60" r="50"></circle>
+                    <circle class="score-circle-progress" id="scoreProgress" cx="60" cy="60" r="50" stroke-dasharray="314.16" stroke-dashoffset="314.16"></circle>
+                  </svg>
+                  <div class="score-text">
+                    <span class="score-val" id="scoreVal">0.0</span>
+                    <span class="score-total">/ 10</span>
+                  </div>
+                </div>
+                
+                <div class="summary-details">
+                  <h4 id="gradeTitle">Critique Completed</h4>
+                  <p id="gradeDesc">Calculating verdict...</p>
+                  <div class="report-meta-badges">
+                    <span class="meta-badge" id="reportModelBadge">Gemini 2.5 Flash</span>
+                    <span class="meta-badge" id="reportFormatBadge">Instagram Post</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Bar for Reports -->
+              <div class="report-actions-row">
+                <button class="btn btn-secondary btn-sm" id="btnCopyReport">
+                  <span class="material-symbols-outlined">content_copy</span>
+                  Copy Report (MD)
+                </button>
+                <button class="btn btn-secondary btn-sm" id="btnDownloadReport">
+                  <span class="material-symbols-outlined">download</span>
+                  Save Markdown
+                </button>
+                <button class="btn btn-secondary btn-sm" id="btnPrintReport">
+                  <span class="material-symbols-outlined">picture_as_pdf</span>
+                  Export PDF
+                </button>
+              </div>
+
+              <!-- Main Report Body (Accordion List) -->
+              <div class="critique-details-list" id="critiqueDetails">
+                <!-- Populated dynamically by JS -->
+              </div>
+
+            </div>
+
+            <!-- 4. Success State: Copy Editor Report -->
+            <div class="hidden" id="stateTextResults">
+              
+              <!-- Report Executive Summary for Text -->
+              <div class="report-summary-card" style="margin-bottom: 12px;">
+                <div style="width: 50px; height: 50px; background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);">
+                  <span class="material-symbols-outlined" style="color: var(--accent-purple); font-size: 24px;">translate</span>
+                </div>
+                <div class="summary-details">
+                  <h4>Copy Polishing Completed</h4>
+                  <p>Grammar checked, punctuation optimized, and tone rewritten.</p>
+                  <div class="report-meta-badges">
+                    <span class="meta-badge" id="textReportModelBadge">Gemini 2.5 Flash</span>
+                    <span class="meta-badge" id="textReportToneBadge">Professional</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Optimized copy panel card -->
+              <div class="report-accordion open" style="border-left: 4px solid var(--accent-cyan); margin-bottom: 12px;">
+                <div class="accordion-header" style="cursor: default;">
+                  <div class="accordion-title-group">
+                    <span class="material-symbols-outlined" style="color: var(--accent-cyan); font-variation-settings: 'FILL' 1;">auto_awesome</span>
+                    <h4 style="color: var(--accent-cyan);">Polished & Rewritten Copy</h4>
+                  </div>
+                  <button class="btn btn-secondary btn-sm" id="btnCopyPolishedCopy" style="padding: 4px 10px;">
+                    <span class="material-symbols-outlined" style="font-size: 14px;">content_copy</span> Copy Copy
+                  </button>
+                </div>
+                <div class="accordion-content" style="max-height: none;">
+                  <div class="accordion-content-inner" style="padding: 16px 20px;">
+                    <div id="polishedTextOutput" style="font-size: 13.5px; line-height: 1.6; color: var(--text-primary); white-space: pre-wrap; background: rgba(255, 255, 255, 0.85); padding: 16px; border-radius: var(--border-radius-md); border: 1px solid var(--border-color); font-family: var(--font-body); letter-spacing: 0.01em;">
+                      Polished text will appear here...
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Detailed reports accordions -->
+              <div class="critique-details-list">
+                
+                <!-- Grammar/Punctuation list -->
+                <div class="report-accordion open critical" id="grammarAccordion">
+                  <div class="accordion-header">
+                    <div class="accordion-title-group">
+                      <span class="material-symbols-outlined accordion-icon">spellcheck</span>
+                      <h4>Grammar & Punctuation Changes</h4>
+                    </div>
+                    <span class="material-symbols-outlined accordion-arrow">expand_more</span>
+                  </div>
+                  <div class="accordion-content" style="max-height: none;">
+                    <div class="accordion-content-inner" id="grammarIssuesList">
+                      <!-- Populated by JS -->
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Tone analysis checklist -->
+                <div class="report-accordion open typography" id="toneAnalysisAccordion">
+                  <div class="accordion-header">
+                    <div class="accordion-title-group">
+                      <span class="material-symbols-outlined accordion-icon">psychology</span>
+                      <h4>Tone, Pacing & Hook Critique</h4>
+                    </div>
+                    <span class="material-symbols-outlined accordion-arrow">expand_more</span>
+                  </div>
+                  <div class="accordion-content" style="max-height: none;">
+                    <div class="accordion-content-inner" id="toneAnalysisList">
+                      <!-- Populated by JS -->
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Settings Configuration Modal -->
+  <div class="modal-backdrop hidden" id="settingsModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="material-symbols-outlined">api</span>
+          <h3>Engine Configuration</h3>
+        </div>
+        <button class="btn-icon" id="closeSettingsBtn">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        
+        <div class="form-group">
+          <label for="connectionTypeSelect">Connection Mode</label>
+          <select id="connectionTypeSelect">
+            <option value="gemini">Google Gemini Cloud (Fast, High Quality, Free Key)</option>
+            <option value="ollama">Ollama Local Offline (Requires local install & GPU)</option>
+          </select>
+        </div>
+
+        <!-- Gemini Options -->
+        <div id="geminiOptionsGroup" class="form-group">
+          <label for="apiKeyInput">Gemini API Key</label>
+          <div class="input-password-wrapper">
+            <input type="password" id="apiKeyInput" placeholder="Enter your AI Studio API Key (AIzaSy...)">
+            <button class="btn-icon" id="toggleApiKeyVisible" type="button">
+              <span class="material-symbols-outlined" id="keyVisIcon">visibility</span>
+            </button>
+          </div>
+          <p class="input-hint">Grab a free API key from <a href="https://aistudio.google.com/" target="_blank" rel="noopener">Google AI Studio</a>. Saved locally in your browser cache.</p>
+        </div>
+
+        <!-- Ollama Options (Hidden by default) -->
+        <div id="ollamaOptionsGroup" class="form-group hidden">
+          <label for="ollamaModelInput">Local Ollama Model</label>
+          <input type="text" id="ollamaModelInput" value="llava" placeholder="e.g., llava, moondream, bakllava">
+          <p class="input-hint">Make sure Ollama is running locally and you have downloaded your model. Run <code style="background: rgba(255,255,255,0.05); padding: 2px 4px; border-radius: 3px; font-family: var(--font-mono);">ollama run llava</code> in command prompt first.</p>
+        </div>
+
+        <div class="form-actions-row">
+          <button class="btn btn-secondary btn-sm" id="testConnectionBtn">
+            <span class="material-symbols-outlined">network_check</span>
+            Test Connection
+          </button>
+          <span id="connectionTestStatus" class="test-status-label"></span>
+        </div>
+
+        <hr class="modal-divider">
+
+        <div class="form-group">
+          <label for="customInstructions">Custom Global Brand Guidelines</label>
+          <textarea id="customInstructions" rows="3" placeholder="E.g., Brand primary color is Navy Blue (#0a192f). Logo must always be placed on the upper-left. Never use Serif fonts. Check for clean alignments specifically."></textarea>
+          <p class="input-hint">Specify your global brand rules, corporate colors, and design limitations. VisiQC will enforce these during analysis.</p>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-outline" id="cancelSettingsBtn">Cancel</button>
+        <button class="btn btn-primary" id="saveSettingsBtn">Save Configuration</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Client / Brand Book Modal -->
+  <div class="modal-backdrop hidden" id="clientModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="material-symbols-outlined">campaign</span>
+          <h3>Create Brand Workspace</h3>
+        </div>
+        <button class="btn-icon" id="btnCloseClientModal">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        
+        <div class="form-group">
+          <label for="clientNameInput">Client / Brand Name</label>
+          <input type="text" id="clientNameInput" placeholder="e.g. Candour, Nike, Apple">
+        </div>
+
+        <div class="form-group">
+          <label for="clientGuidelinesInput">Brand Guidelines & Directives</label>
+          <textarea id="clientGuidelinesInput" rows="3" placeholder="Core brand values, personality tone, or specific design mandates..."></textarea>
+        </div>
+
+        <!-- Dynamic Colors adding section -->
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label>Brand Colors Palette</label>
+            <button type="button" id="btnAddColorRow" class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 10px;">+ Color</button>
+          </div>
+          <div id="modalColorsList" class="dynamic-form-list">
+            <!-- Dynamically generated rows -->
+          </div>
+        </div>
+
+        <!-- Dynamic Fonts adding section -->
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label>Brand Fonts & Typography</label>
+            <button type="button" id="btnAddFontRow" class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 10px;">+ Font</button>
+          </div>
+          <div id="modalFontsList" class="dynamic-form-list">
+            <!-- Dynamically generated rows -->
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="clientLogoRulesInput">Logo Placement Rules</label>
+          <input type="text" id="clientLogoRulesInput" placeholder="e.g. Always top-left; minimum 20px padding from edges.">
+        </div>
+
+        <div class="form-group">
+          <label for="clientCtaRulesInput">CTA Messaging & Visual Rules</label>
+          <input type="text" id="clientCtaRulesInput" placeholder="e.g. Primary button color, must say 'Sign Up Today' for campaigns.">
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-outline" id="btnCancelClientModal">Cancel</button>
+        <button class="btn btn-primary" id="btnSaveClient">Save Brand Workspace</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Project Modal -->
+  <div class="modal-backdrop hidden" id="projectModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="material-symbols-outlined">space_dashboard</span>
+          <h3>Create Campaign Project</h3>
+        </div>
+        <button class="btn-icon" id="btnCloseProjectModal">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        
+        <div class="form-group">
+          <label for="newProjClient">Parent Brand Workspace</label>
+          <select id="newProjClient">
+            <!-- Populated dynamically with current clients list -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="newProjName">Project / Campaign Name</label>
+          <input type="text" id="newProjName" placeholder="e.g. Summer Launch Ads, LinkedIn Recruiting 2026">
+        </div>
+
+        <div class="form-group">
+          <label for="newProjDesc">Campaign Description & Target Goals</label>
+          <textarea id="newProjDesc" rows="3" placeholder="Explain the key objectives, focal target audience, or campaign message..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="newProjPlatform">Default Target Format</label>
+          <select id="newProjPlatform">
+            <option value="auto">Auto-Detect Platform</option>
+            <option value="instagram_post">Instagram Square (1:1)</option>
+            <option value="instagram_story">Instagram Story / Reel (9:16)</option>
+            <option value="linkedin_creative">LinkedIn Image Ad</option>
+            <option value="youtube_thumbnail">YouTube Thumbnail</option>
+            <option value="banner_ad">Digital Banner Ad</option>
+            <option value="ui_screen">UI/UX App Screen</option>
+            <option value="presentation_slide">Presentation Slide (16:9)</option>
+            <option value="packaging">Packaging Design</option>
+            <option value="print_poster">Print Poster / Magazine Ad</option>
+          </select>
+        </div>
+
+        <!-- Dynamic Design thinking references dynamic listing -->
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label>Design Thinking & References</label>
+            <button type="button" id="btnAddRefRow" class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 10px;">+ Reference</button>
+          </div>
+          <div id="modalRefsList" class="dynamic-form-list">
+            <!-- Dynamically generated reference links -->
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-outline" id="btnCancelProjectModal">Cancel</button>
+        <button class="btn btn-primary" id="btnSaveProject">Create Project</button>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+  <!-- Shared namespace sequential script imports -->
+  <script src="js/state.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/editor.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

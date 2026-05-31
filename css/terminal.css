@@ -1,0 +1,89 @@
+/* ==========================================================================
+   AI DIAGNOSTIC TERMINAL LOADER
+   ========================================================================== */
+.terminal-loader {
+  width: 100%;
+  max-width: 520px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.35) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--border-radius-md);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: 
+    0 20px 40px rgba(13, 12, 27, 0.04), 
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.terminal-header {
+  background: rgba(13, 12, 27, 0.02);
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.terminal-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.terminal-dots .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.terminal-dots .dot:nth-child(1) { background: #ef4444; }
+.terminal-dots .dot:nth-child(2) { background: #ea580c; }
+.terminal-dots .dot:nth-child(3) { background: #10b981; }
+
+.terminal-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+.terminal-body {
+  padding: 16px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  height: 180px;
+  overflow-y: auto;
+}
+
+.log-line {
+  margin-bottom: 6px;
+  display: flex;
+  gap: 8px;
+}
+
+.log-line::before {
+  content: '$';
+  color: var(--text-muted);
+}
+
+.log-line.text-info { color: var(--accent-blue); }
+.log-line.text-warning { color: var(--accent-pink); }
+.log-line.text-success { color: var(--color-success); }
+.log-line.text-muted { color: var(--text-muted); }
+
+.terminal-footer {
+  padding: 2px 0 0;
+  background: rgba(255, 255, 255, 0.25);
+  border-top: 1px solid var(--border-color);
+}
+
+.loader-line {
+  height: 2px;
+  background: var(--grad-glow);
+  width: 100%;
+  animation: loadingSlide 2s infinite linear;
+}

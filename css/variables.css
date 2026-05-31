@@ -1,0 +1,53 @@
+:root {
+  /* Backgrounds */
+  --bg-primary: #f6f5f0;       /* Premium warm off-white editorial paper */
+  --bg-secondary: #eae9e2;     /* Slightly darker warm off-white */
+  --bg-panel: rgba(255, 255, 255, 0.45); /* Glass card bg */
+  --bg-input: rgba(255, 255, 255, 0.65);
+  
+  --border-color: rgba(13, 12, 27, 0.08); /* Soft grey-navy border for layouts/inputs */
+  --border-glass: rgba(255, 255, 255, 0.8); /* White specular border for glass cards */
+  --border-glow: rgba(27, 42, 207, 0.1);
+  
+  /* Accent Colors */
+  --accent-blue: #1b2acf;      /* Electric Royal Blue */
+  --accent-purple: #4f46e5;    /* Vivid Indigo */
+  --accent-pink: #ea580c;      /* Bright editorial orange */
+  --accent-cyan: #ea580c;      /* Editorial orange */
+  
+  /* Status Colors */
+  --color-success: #10b981;
+  --color-warning: #ea580c;
+  --color-danger: #ef4444;
+  --color-info: #1b2acf;
+  
+  /* Text */
+  --text-primary: #0d0c1b;     /* Editorial deep navy/charcoal */
+  --text-secondary: #3d3c4a;   /* Corporate body grey */
+  --text-muted: #7c7b8c;       /* Muted label grey */
+  
+  /* Gradients */
+  --grad-primary: linear-gradient(135deg, #1b2acf 0%, #4f46e5 100%);
+  --grad-glow: linear-gradient(90deg, #1b2acf, #4f46e5, #ea580c);
+  --grad-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --grad-danger: linear-gradient(135deg, #ef4444 0%, #ea580c 100%);
+  
+  /* Typography & Layout defaults */
+  --font-display: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'Fira Code', 'Courier New', monospace;
+  
+  --transition-smooth: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --border-radius-lg: 24px;   /* Curvature from deck */
+  --border-radius-md: 16px;
+  --border-radius-sm: 8px;
+  
+  --shadow-glow: 0 10px 40px rgba(13, 12, 27, 0.02), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  --shadow-neon-blue: 0 4px 15px rgba(27, 42, 207, 0.1);
+  --shadow-neon-pink: 0 4px 15px rgba(234, 88, 12, 0.1);
+  
+  --grid-line: #e2e0d7;
+  
+  /* Specular and glow tokens */
+  --glass-blur: blur(25px) saturate(120%);
+}

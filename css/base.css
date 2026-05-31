@@ -1,0 +1,126 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(13, 12, 27, 0.15) transparent;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+  height: 100vh;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+}
+
+/* Background circular geometric line pattern matching new offsite deck */
+body::before {
+  content: '';
+  position: absolute;
+  inset: -40px;
+  z-index: -2;
+  background-color: var(--bg-primary);
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><circle cx="100" cy="100" r="80" fill="none" stroke="%23e2e0d7" stroke-width="0.75"/><circle cx="100" cy="100" r="40" fill="none" stroke="%23e2e0d7" stroke-width="0.5"/><path d="M 0 100 L 200 100 M 100 0 L 100 200" stroke="%23e2e0d7" stroke-width="0.5"/><circle cx="0" cy="0" r="100" fill="none" stroke="%23e2e0d7" stroke-width="0.5"/><circle cx="200" cy="0" r="100" fill="none" stroke="%23e2e0d7" stroke-width="0.5"/><circle cx="0" cy="200" r="100" fill="none" stroke="%23e2e0d7" stroke-width="0.5"/><circle cx="200" cy="200" r="100" fill="none" stroke="%23e2e0d7" stroke-width="0.5"/></svg>');
+  background-repeat: repeat;
+  background-position: center;
+  pointer-events: none;
+  opacity: 0.85;
+  transform: translate3d(var(--bg-shift-x, 0px), var(--bg-shift-y, 0px), 0px);
+  will-change: transform;
+}
+
+.bg-spotlight {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(
+    circle,
+    rgba(27, 42, 207, 0.035) 0%,
+    rgba(234, 88, 12, 0.025) 40%,
+    rgba(27, 42, 207, 0.003) 70%,
+    transparent 85%
+  );
+  pointer-events: none;
+  z-index: -1;
+  will-change: transform;
+  transform: translate3d(0, 0, 0) translate(-50%, -50%);
+}
+
+.bg-grid-glow {
+  position: fixed;
+  top: -40px;
+  left: -40px;
+  right: -40px;
+  bottom: -40px;
+  z-index: -2;
+  pointer-events: none;
+  transform: translate3d(var(--bg-shift-x, 0px), var(--bg-shift-y, 0px), 0px);
+  will-change: transform;
+  
+  /* Static mask of the background grid pattern */
+  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><circle cx="100" cy="100" r="80" fill="none" stroke="black" stroke-width="1.2"/><circle cx="100" cy="100" r="40" fill="none" stroke="black" stroke-width="0.8"/><path d="M 0 100 L 200 100 M 100 0 L 100 200" stroke="black" stroke-width="0.8"/><circle cx="0" cy="0" r="100" fill="none" stroke="black" stroke-width="0.8"/><circle cx="200" cy="0" r="100" fill="none" stroke="black" stroke-width="0.8"/><circle cx="0" cy="200" r="100" fill="none" stroke="black" stroke-width="0.8"/><circle cx="200" cy="200" r="100" fill="none" stroke="black" stroke-width="0.8"/></svg>');
+  -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><circle cx="100" cy="100" r="80" fill="none" stroke="black" stroke-width="1.2"/><circle cx="100" cy="100" r="40" fill="none" stroke="black" stroke-width="0.8"/><path d="M 0 100 L 200 100 M 100 0 L 100 200" stroke="black" stroke-width="0.8"/><circle cx="0" cy="0" r="100" fill="none" stroke="black" stroke-width="0.8"/><circle cx="200" cy="0" r="100" fill="none" stroke="black" stroke-width="0.8"/><circle cx="0" cy="200" r="100" fill="none" stroke="black" stroke-width="0.8"/><circle cx="200" cy="200" r="100" fill="none" stroke="black" stroke-width="0.8"/></svg>');
+  mask-repeat: repeat;
+  -webkit-mask-repeat: repeat;
+  mask-position: center;
+  -webkit-mask-position: center;
+  
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+.grid-glow-spotlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(
+    circle,
+    rgba(27, 42, 207, 0.45) 0%,
+    rgba(234, 88, 12, 0.35) 45%,
+    rgba(27, 42, 207, 0.05) 70%,
+    transparent 100%
+  );
+  pointer-events: none;
+  will-change: transform;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+a {
+  color: var(--accent-blue);
+  text-decoration: none;
+  transition: var(--transition-smooth);
+}
+a:hover {
+  text-decoration: underline;
+  color: var(--accent-purple);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(13, 12, 27, 0.12);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(13, 12, 27, 0.25);
+}
