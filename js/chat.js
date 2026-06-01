@@ -18,7 +18,7 @@
         { sender: "incoming", text: "Hey! Let me know when the copy for the EV campaign is ready.", time: "10:12 AM" }
       ],
       alka: [
-        { sender: "incoming", text: "Hi, need the Minecraft ad creative reviewed. Alka needs to sign off on the logo placement.", time: "09:34 AM" }
+        { sender: "incoming", text: "Hi, need the Minecraft ad creative reviewed. I need to sign off on the logo placement.", time: "09:34 AM" }
       ],
       durgesh: [
         { sender: "incoming", text: "Please run the visual audit and send the report once the alignment is corrected.", time: "Yesterday" }
