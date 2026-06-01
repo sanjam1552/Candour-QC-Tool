@@ -973,6 +973,22 @@
     });
 
     el.analyzeBtn.addEventListener('click', runVisualAuditPipeline);
+
+    // Persistent listener to display correct image dimensions (handles scaling/history loads safely)
+    el.previewImage.onload = () => {
+      if (State.state.activeHistoryId) {
+        const activeItem = State.state.history.find(h => h.id === State.state.activeHistoryId);
+        if (activeItem && activeItem.width && activeItem.height) {
+          el.imgDimensions.textContent = `${activeItem.width} x ${activeItem.height} px`;
+          return;
+        }
+      }
+      const w = el.previewImage.naturalWidth || el.previewImage.width || 0;
+      const h = el.previewImage.naturalHeight || el.previewImage.height || 0;
+      if (w > 0 && h > 0) {
+        el.imgDimensions.textContent = `${w} x ${h} px`;
+      }
+    };
   }
 
   function handleImageSelection(file) {
@@ -991,9 +1007,6 @@
       State.state.currentImageMimeType = file.type;
       
       el.previewImage.src = e.target.result;
-      el.previewImage.onload = () => {
-        el.imgDimensions.textContent = `${el.previewImage.naturalWidth} x ${el.previewImage.naturalHeight} px`;
-      };
 
       el.uploadPlaceholder.classList.add('hidden');
       el.previewContainer.classList.remove('hidden');
@@ -1243,13 +1256,17 @@
         
         Render.displayCritiqueReport(parsedReport, reportModelName, reportFormatName);
         
-        // Cache visual thumbnail for log files list
+        // Cache visual thumbnail and medium-sized preview for log files list (to prevent localStorage quota issues)
         const thumbnail = await createThumbnail(el.previewImage);
+        const mediumPreview = await createMediumPreview(el.previewImage);
         const newHistId = Date.now();
         State.addHistory({
           id: newHistId,
           title: State.state.currentImageName,
           thumbnail: thumbnail,
+          image: mediumPreview,
+          width: el.previewImage.naturalWidth || el.previewImage.width || 0,
+          height: el.previewImage.naturalHeight || el.previewImage.height || 0,
           score: parsedReport.score,
           model: reportModelName,
           platform: reportFormatName,
@@ -2112,12 +2129,14 @@
       card.classList.toggle('active', parseInt(card.dataset.id) === item.id);
     });
 
-    // Populate visual previews
-    State.state.currentImageBase64 = item.rawResponse ? null : item.thumbnail;
+    // Populate visual previews (falling back to thumbnail for legacy items)
+    State.state.currentImageBase64 = item.image || item.thumbnail;
     State.state.currentImageName = item.title;
     el.imgName.textContent = item.title;
-    el.previewImage.src = item.thumbnail;
-    el.imgDimensions.textContent = "Cached History Report";
+    el.previewImage.src = item.image || item.thumbnail;
+    el.imgDimensions.textContent = item.width && item.height 
+      ? `${item.width} x ${item.height} px` 
+      : "Cached History Report";
     
     el.uploadPlaceholder.classList.add('hidden');
     el.previewContainer.classList.remove('hidden');
@@ -2180,6 +2199,34 @@
       canvas.height = height;
       ctx.drawImage(imgElement, 0, 0, width, height);
       resolve(canvas.toDataURL('image/jpeg', 0.7));
+    });
+  }
+
+  // Generate a compressed preview image (max 800px) to save space in localStorage
+  function createMediumPreview(imgElement) {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const maxDim = 800;
+      let width = imgElement.naturalWidth || imgElement.width || 800;
+      let height = imgElement.naturalHeight || imgElement.height || 800;
+
+      if (width > height) {
+        if (width > maxDim) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        }
+      } else {
+        if (height > maxDim) {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      ctx.drawImage(imgElement, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/jpeg', 0.75));
     });
   }
 

@@ -276,18 +276,38 @@
 .left-tabs-group {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 0 32px;
+  gap: 8px;
+  padding: 0 20px;
   border-right: 1px solid var(--border-color);
   position: relative;
   z-index: 2;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(79, 70, 229, 0.15) transparent;
+}
+
+.left-tabs-group::-webkit-scrollbar {
+  height: 3px;
+}
+
+.left-tabs-group::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.left-tabs-group::-webkit-scrollbar-thumb {
+  background: rgba(79, 70, 229, 0.15);
+  border-radius: 2px;
+}
+
+.left-tabs-group::-webkit-scrollbar-thumb:hover {
+  background: rgba(79, 70, 229, 0.3);
 }
 
 .right-report-group {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 32px;
+  padding: 0 20px;
   position: relative;
   z-index: 2;
 }
@@ -667,4 +687,42 @@
 
 .workspace-header-row.full-width {
   grid-template-columns: 1fr;
+}
+
+/* Responsive adjustments for high display scaling and smaller screens */
+@media (max-width: 1450px) {
+  .top-bar {
+    padding: 0 20px;
+    gap: 12px;
+  }
+  
+  .left-tabs-group {
+    padding: 0 16px;
+    gap: 8px;
+  }
+  
+  .right-report-group {
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 1150px) {
+  .top-bar {
+    padding: 0 12px;
+    height: auto;
+    min-height: 96px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  
+  .left-tabs-group {
+    padding: 0 8px;
+    gap: 6px;
+  }
+  
+  .right-report-group {
+    padding: 0 8px;
+  }
 }
