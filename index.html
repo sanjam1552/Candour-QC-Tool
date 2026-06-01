@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="css/modals.css">
   <link rel="stylesheet" href="css/scanner.css">
   <link rel="stylesheet" href="css/editor.css">
+  <link rel="stylesheet" href="css/chat.css">
 </head>
 <body>
 
@@ -312,6 +313,10 @@
                 <span class="material-symbols-outlined">analytics</span>
                 Analyze & Run Audit
               </button>
+              <button class="btn btn-primary" id="btnSendVisualToSenior" disabled style="flex-grow: 1;">
+                <span class="material-symbols-outlined">send</span>
+                Send to Senior
+              </button>
             </div>
           </div>
 
@@ -377,9 +382,15 @@
               </div>
               
               <!-- Action Buttons Row in Sidebar Footer -->
-              <div style="display: flex; gap: 8px; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border-color); flex-shrink: 0;">
-                <button class="btn btn-secondary" id="btnExportCreatorDesign" type="button" style="flex: 1; padding: 8px 12px; font-size: 12px;">Export Design</button>
-                <button class="btn btn-primary" id="btnSetCreatorAsActive" type="button" style="flex: 1.5; padding: 8px 12px; font-size: 12px;">Set as Active Creative</button>
+              <div style="display: flex; flex-direction: column; gap: 8px; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border-color); flex-shrink: 0;">
+                <div style="display: flex; gap: 8px; width: 100%;">
+                  <button class="btn btn-secondary" id="btnExportCreatorDesign" type="button" style="flex: 1; padding: 8px 12px; font-size: 11px;">Export Design</button>
+                  <button class="btn btn-primary" id="btnSetCreatorAsActive" type="button" style="flex: 1.5; padding: 8px 12px; font-size: 11px;">Set as Active Creative</button>
+                </div>
+                <button class="btn btn-primary btn-outline" id="btnSendCreatorToSenior" disabled type="button" style="width: 100%; padding: 8px 12px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                  <span class="material-symbols-outlined" style="font-size: 16px;">send</span>
+                  Send to Senior for Approval
+                </button>
               </div>
             </div>
           </div>
@@ -437,13 +448,17 @@
             </div>
 
             <div class="panel-actions">
-              <button class="btn btn-danger btn-outline" id="btnResetText" disabled>
+              <button class="btn btn-danger btn-outline" id="btnResetText" disabled style="flex-grow: 1;">
                 <span class="material-symbols-outlined">restart_alt</span>
                 Reset Copy
               </button>
-              <button class="btn btn-success" id="btnAnalyzeText" disabled>
+              <button class="btn btn-success" id="btnAnalyzeText" disabled style="flex-grow: 2;">
                 <span class="material-symbols-outlined">auto_fix_high</span>
                 Audit & Polish Copy
+              </button>
+              <button class="btn btn-primary" id="btnSendCopyToSenior" disabled style="flex-grow: 1;">
+                <span class="material-symbols-outlined">send</span>
+                Send to Senior
               </button>
             </div>
           </div>
@@ -1121,12 +1136,86 @@
 
 
 
+  <!-- Floating Chat Button -->
+  <button id="floatingChatBtn" class="floating-chat-btn" title="Open Senior Approval Chat">
+    <span class="material-symbols-outlined">forum</span>
+    <span class="chat-badge pulse" id="chatBadge" style="display: none;">1</span>
+  </button>
+
+  <!-- Senior Approval & Chat Drawer -->
+  <div id="chatDrawer" class="chat-drawer">
+    <div class="chat-drawer-header">
+      <div class="header-title">
+        <span class="material-symbols-outlined">forum</span>
+        <h3>Senior Approval Portal</h3>
+      </div>
+      <button class="chat-close-btn" id="closeChatBtn">&times;</button>
+    </div>
+    
+    <div class="chat-drawer-body">
+      <!-- Contact Selection Tabs -->
+      <div class="chat-contacts">
+        <div class="contact-tab active" data-contact="suvrata">
+          <div class="avatar avatar-suvrata">S</div>
+          <div class="contact-info">
+            <span class="contact-name">Suvrata</span>
+            <span class="contact-status online">Online</span>
+          </div>
+        </div>
+        <div class="contact-tab" data-contact="alka">
+          <div class="avatar avatar-alka">A</div>
+          <div class="contact-info">
+            <span class="contact-name">Alka</span>
+            <span class="contact-status online">Online</span>
+          </div>
+        </div>
+        <div class="contact-tab" data-contact="durgesh">
+          <div class="avatar avatar-durgesh">D</div>
+          <div class="contact-info">
+            <span class="contact-name">Durgesh</span>
+            <span class="contact-status offline">Away</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Chat Message Log -->
+      <div class="chat-log" id="chatLog">
+        <!-- Messages populated dynamically depending on selected contact -->
+      </div>
+
+      <!-- Current Attachment Preview -->
+      <div id="chatAttachmentPreview" class="chat-attachment-preview hidden">
+        <div class="attachment-header">
+          <span>Current Attachment</span>
+          <button id="btnRemoveAttachment" class="btn-remove-attachment">&times;</button>
+        </div>
+        <div class="attachment-body" id="attachmentBody">
+          <!-- Text or Image thumbnail preview -->
+        </div>
+      </div>
+    </div>
+    
+    <div class="chat-drawer-footer">
+      <div class="chat-input-wrapper">
+        <button id="chatAttachFileBtn" class="chat-attach-btn" title="Attach image creative">
+          <span class="material-symbols-outlined">attach_file</span>
+        </button>
+        <input type="file" id="chatFileInput" accept="image/*" style="display: none;">
+        <textarea id="chatMessageInput" class="chat-textarea" placeholder="Message Suvrata..."></textarea>
+        <button id="chatSendBtn" class="chat-send-btn" title="Send message">
+          <span class="material-symbols-outlined">send</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Shared namespace sequential script imports -->
   <script src="js/state.js"></script>
   <script src="js/api.js"></script>
   <script src="js/render.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/editor.js"></script>
+  <script src="js/chat.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
