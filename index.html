@@ -175,7 +175,7 @@
       </header>
 
       <!-- Animated SVG color waves strip -->
-      <div class="workspace-header-row">
+      <div class="workspace-header-row full-width">
         <div class="top-bar-waves">
           <svg class="wave-svg" viewBox="0 0 1440 96" preserveAspectRatio="none">
             <defs>
@@ -219,17 +219,17 @@
         
         <!-- Tabs toggles split -->
         <div class="left-tabs-group">
-          <button class="panel-tab active" id="tabVisual">
-            <span class="material-symbols-outlined">image</span>
-            Visual Audit
+          <button class="panel-tab active" id="tabResearch" title="Launch B2B Trend Research">
+            <span class="material-symbols-outlined">explore</span>
+            B2B Trends
           </button>
           <button class="panel-tab" id="tabText">
             <span class="material-symbols-outlined">edit_note</span>
             Copy & Tone Editor
           </button>
-          <button class="panel-tab" id="tabResearch" title="Launch B2B Trend Research">
-            <span class="material-symbols-outlined">explore</span>
-            B2B Trends
+          <button class="panel-tab" id="tabVisual">
+            <span class="material-symbols-outlined">image</span>
+            Visual Audit
           </button>
           <button class="panel-tab" id="tabCreator" title="Launch AI Image Creator">
             <span class="material-symbols-outlined">draw</span>
@@ -237,20 +237,20 @@
           </button>
         </div>
         
-        <div class="right-report-group">
+        <div class="right-report-group hidden">
           <h3>Audit Reports & QC Results</h3>
           <span class="badge" id="qcScoreBadge">READY</span>
         </div>
       </div>
 
       <!-- Dashboard Workspace panels grid -->
-      <div class="workspace-grid">
+      <div class="workspace-grid full-width">
         
         <!-- Left Panel: Creative Upload & Visual Feedback -->
         <section class="workspace-panel panel-left">
 
           <!-- Tab 1: Visual Audit Content -->
-          <div id="visualTabContent" class="tab-content-wrapper" style="display: flex; flex-direction: column; flex-grow: 1; overflow: hidden;">
+          <div id="visualTabContent" class="tab-content-wrapper hidden" style="display: flex; flex-direction: column; flex-grow: 1; overflow: hidden;">
             <div class="upload-container" id="dropZone">
               <input type="file" id="fileInput" accept="image/*" style="display: none;">
               
@@ -449,7 +449,7 @@
           </div>
 
           <!-- Tab 2.5 (Rendered as Tab 3): B2B Trend Research Content -->
-          <div id="researchTabContent" class="tab-content-wrapper hidden" style="display: flex; flex-direction: column; flex-grow: 1; overflow: hidden; height: 100%;">
+          <div id="researchTabContent" class="tab-content-wrapper" style="display: flex; flex-direction: column; flex-grow: 1; overflow: hidden; height: 100%;">
             <div class="research-container" style="flex-grow: 1; padding: 24px 32px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto;">
               
               <!-- Topic Input and Search block -->
@@ -747,7 +747,7 @@
         </section>
 
         <!-- Right Panel: Diagnostic Report Console -->
-        <section class="workspace-panel panel-right">
+        <section class="workspace-panel panel-right hidden">
           <div class="results-container">
             
             <!-- 1. Initial State: Upload prompt -->
