@@ -1101,8 +1101,10 @@
       "Reviewing visual flow hierarchy..."
     ];
 
+    const logTimeouts = [];
     logs.forEach(log => {
-      setTimeout(() => appendVisualTerminalLog(log.text, log.type), log.time);
+      const id = setTimeout(() => appendVisualTerminalLog(log.text, log.type), log.time);
+      logTimeouts.push(id);
     });
 
     let tickerInterval = setInterval(() => {
@@ -1224,83 +1226,79 @@
       clearInterval(tickerInterval);
       clearInterval(scanElementsInterval);
       if (activeNeuralScanner) activeNeuralScanner.stop();
+      logTimeouts.forEach(clearTimeout);
       
-      setTimeout(() => {
-        alert(`Analysis Engine Failed:\n${err.message}`);
-        State.state.isAnalyzing = false;
-        document.body.classList.remove('analyzing-active');
-        el.dropZone.classList.remove('scanning');
-        el.liveTicker.classList.add('hidden');
-        el.stateAnalyzing.classList.add('hidden');
-        el.stateReady.classList.remove('hidden');
-        el.qcScoreBadge.textContent = 'ERROR';
-        el.qcScoreBadge.className = 'badge score-badge-red';
-        el.analyzeBtn.removeAttribute('disabled');
-        el.resetBtn.removeAttribute('disabled');
-        el.removeImgBtn.classList.remove('hidden');
-      }, 1500);
+      alert(`Analysis Engine Failed:\n${err.message}`);
+      State.state.isAnalyzing = false;
+      document.body.classList.remove('analyzing-active');
+      el.dropZone.classList.remove('scanning');
+      el.liveTicker.classList.add('hidden');
+      el.stateAnalyzing.classList.add('hidden');
+      el.stateReady.classList.remove('hidden');
+      el.qcScoreBadge.textContent = 'ERROR';
+      el.qcScoreBadge.className = 'badge score-badge-red';
+      el.analyzeBtn.removeAttribute('disabled');
+      el.resetBtn.removeAttribute('disabled');
+      el.removeImgBtn.classList.remove('hidden');
       return;
     }
 
-    // Wait for the minimum animation loop (4 seconds)
-    setTimeout(() => {
-      clearInterval(tickerInterval);
-      clearInterval(scanElementsInterval);
-      if (activeNeuralScanner) activeNeuralScanner.stop();
-      appendVisualTerminalLog("Data received. Processing visual critique metrics...", "success");
-      
-      setTimeout(async () => {
-        el.dropZone.classList.remove('scanning');
-        el.liveTicker.classList.add('hidden');
-        el.removeImgBtn.classList.remove('hidden');
+    // Clean up scanner animations and print final log
+    clearInterval(tickerInterval);
+    clearInterval(scanElementsInterval);
+    if (activeNeuralScanner) activeNeuralScanner.stop();
+    logTimeouts.forEach(clearTimeout);
+    appendVisualTerminalLog("Data received. Processing visual critique metrics...", "success");
 
-        window.currentRawCritique = rawResult;
-        const parsedReport = parseCritiqueReport(rawResult);
-        const reportModelName = State.state.connectionType === 'gemini' 
-          ? el.modelSelector.options[el.modelSelector.selectedIndex].text 
-          : `Ollama (${State.state.ollamaModel})`;
-        const reportFormatName = el.platformSelector.options[el.platformSelector.selectedIndex].text;
-        
-        Render.displayCritiqueReport(parsedReport, reportModelName, reportFormatName);
-        
-        // Cache visual thumbnail and medium-sized preview for log files list (to prevent localStorage quota issues)
-        const thumbnail = await createThumbnail(el.previewImage);
-        const mediumPreview = await createMediumPreview(el.previewImage);
-        const newHistId = Date.now();
-        State.addHistory({
-          id: newHistId,
-          title: State.state.currentImageName,
-          thumbnail: thumbnail,
-          image: mediumPreview,
-          width: el.previewImage.naturalWidth || el.previewImage.width || 0,
-          height: el.previewImage.naturalHeight || el.previewImage.height || 0,
-          score: parsedReport.score,
-          model: reportModelName,
-          platform: reportFormatName,
-          rawResponse: rawResult,
-          timestamp: new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-        });
+    el.dropZone.classList.remove('scanning');
+    el.liveTicker.classList.add('hidden');
+    el.removeImgBtn.classList.remove('hidden');
 
-        // Set active item selection
-        State.state.activeHistoryId = newHistId;
+    window.currentRawCritique = rawResult;
+    const parsedReport = parseCritiqueReport(rawResult);
+    const reportModelName = State.state.connectionType === 'gemini' 
+      ? el.modelSelector.options[el.modelSelector.selectedIndex].text 
+      : `Ollama (${State.state.ollamaModel})`;
+    const reportFormatName = el.platformSelector.options[el.platformSelector.selectedIndex].text;
+    
+    Render.displayCritiqueReport(parsedReport, reportModelName, reportFormatName);
+    
+    // Cache visual thumbnail and medium-sized preview for log files list (to prevent localStorage quota issues)
+    const thumbnail = await createThumbnail(el.previewImage);
+    const mediumPreview = await createMediumPreview(el.previewImage);
+    const newHistId = Date.now();
+    State.addHistory({
+      id: newHistId,
+      title: State.state.currentImageName,
+      thumbnail: thumbnail,
+      image: mediumPreview,
+      width: el.previewImage.naturalWidth || el.previewImage.width || 0,
+      height: el.previewImage.naturalHeight || el.previewImage.height || 0,
+      score: parsedReport.score,
+      model: reportModelName,
+      platform: reportFormatName,
+      rawResponse: rawResult,
+      timestamp: new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+    });
 
-        // Re-render project history
-        const filteredHistory = State.getFilteredHistory();
-        Render.renderHistory(
-          filteredHistory, 
-          State.state.activeHistoryId, 
-          loadHistoryItem, 
-          deleteHistoryItem
-        );
+    // Set active item selection
+    State.state.activeHistoryId = newHistId;
 
-        el.stateAnalyzing.classList.add('hidden');
-        el.stateResults.classList.remove('hidden');
-        el.analyzeBtn.removeAttribute('disabled');
-        el.resetBtn.removeAttribute('disabled');
-        State.state.isAnalyzing = false;
-        document.body.classList.remove('analyzing-active');
-      }, 800);
-    }, 4000);
+    // Re-render project history
+    const filteredHistory = State.getFilteredHistory();
+    Render.renderHistory(
+      filteredHistory, 
+      State.state.activeHistoryId, 
+      loadHistoryItem, 
+      deleteHistoryItem
+    );
+
+    el.stateAnalyzing.classList.add('hidden');
+    el.stateResults.classList.remove('hidden');
+    el.analyzeBtn.removeAttribute('disabled');
+    el.resetBtn.removeAttribute('disabled');
+    State.state.isAnalyzing = false;
+    document.body.classList.remove('analyzing-active');
   }
 
   function appendVisualTerminalLog(text, type) {
@@ -1587,14 +1585,16 @@
         { text: "Formatting polished copy recommendations...", type: "info", time: 3300 }
       ];
 
+      const logTimeouts = [];
       logs.forEach(log => {
-        setTimeout(() => {
+        const id = setTimeout(() => {
           const line = document.createElement('div');
           line.className = `log-line text-${log.type}`;
           line.textContent = `[${new Date().toLocaleTimeString()}] ${log.text}`;
           terminalText.appendChild(line);
           terminalText.scrollTop = terminalText.scrollHeight;
         }, log.time);
+        logTimeouts.push(id);
       });
 
       let rawResult = "";
@@ -1633,42 +1633,41 @@
         line.className = 'log-line text-danger';
         line.textContent = `[FATAL] Copy audit crashed: ${err.message}`;
         terminalText.appendChild(line);
+        logTimeouts.forEach(clearTimeout);
         
-        setTimeout(() => {
-          alert(`Text Analysis Failed:\n${err.message}`);
-          State.state.isAnalyzing = false;
-          document.body.classList.remove('analyzing-active');
-          el.stateAnalyzing.classList.add('hidden');
-          el.stateReady.classList.remove('hidden');
-          el.qcScoreBadge.textContent = 'ERROR';
-          el.qcScoreBadge.className = 'badge score-badge-red';
-          btnAnalyzeText.removeAttribute('disabled');
-          btnResetText.removeAttribute('disabled');
-        }, 1500);
+        alert(`Text Analysis Failed:\n${err.message}`);
+        State.state.isAnalyzing = false;
+        document.body.classList.remove('analyzing-active');
+        el.stateAnalyzing.classList.add('hidden');
+        el.stateReady.classList.remove('hidden');
+        el.qcScoreBadge.textContent = 'ERROR';
+        el.qcScoreBadge.className = 'badge score-badge-red';
+        btnAnalyzeText.removeAttribute('disabled');
+        btnResetText.removeAttribute('disabled');
         return;
       }
 
-      // Display results after simulated audit timing
-      setTimeout(() => {
-        const parsedReport = parseTextCritiqueReport(rawResult);
-        const engineModelName = State.state.connectionType === 'gemini' 
-          ? el.modelSelector.options[el.modelSelector.selectedIndex].text 
-          : `Ollama (${State.state.ollamaModel})`;
-        
-        Render.displayTextReport(parsedReport, engineModelName, selectedTone.toUpperCase());
-        
-        el.stateAnalyzing.classList.add('hidden');
-        resultsText.style.display = 'block';
-        resultsText.classList.remove('hidden');
-        
-        el.qcScoreBadge.textContent = 'POLISHED';
-        el.qcScoreBadge.className = 'badge score-badge-green';
-        
-        btnAnalyzeText.removeAttribute('disabled');
-        btnResetText.removeAttribute('disabled');
-        State.state.isAnalyzing = false;
-        document.body.classList.remove('analyzing-active');
-      }, 3800);
+      // Display results immediately
+      logTimeouts.forEach(clearTimeout);
+
+      const parsedReport = parseTextCritiqueReport(rawResult);
+      const engineModelName = State.state.connectionType === 'gemini' 
+        ? el.modelSelector.options[el.modelSelector.selectedIndex].text 
+        : `Ollama (${State.state.ollamaModel})`;
+      
+      Render.displayTextReport(parsedReport, engineModelName, selectedTone.toUpperCase());
+      
+      el.stateAnalyzing.classList.add('hidden');
+      resultsText.style.display = 'block';
+      resultsText.classList.remove('hidden');
+      
+      el.qcScoreBadge.textContent = 'POLISHED';
+      el.qcScoreBadge.className = 'badge score-badge-green';
+      
+      btnAnalyzeText.removeAttribute('disabled');
+      btnResetText.removeAttribute('disabled');
+      State.state.isAnalyzing = false;
+      document.body.classList.remove('analyzing-active');
     });
   }
 
