@@ -40,6 +40,7 @@
     clients: [],
     projects: [],
     history: [],
+    assignments: [],
     activeClientId: 'default_client',
     activeProjectId: 'default_project',
     connectionType: localStorage.getItem('visiqc_connection_type') || 'gemini',
@@ -62,6 +63,7 @@
         state.clients = parsed.clients || [];
         state.projects = parsed.projects || [];
         state.history = parsed.history || [];
+        state.assignments = parsed.assignments || [];
       } catch (e) {
         console.error('Failed to parse database, resetting...', e);
       }
@@ -137,7 +139,8 @@
     const db = {
       clients: state.clients,
       projects: state.projects,
-      history: state.history
+      history: state.history,
+      assignments: state.assignments || []
     };
     localStorage.setItem(DB_KEY, JSON.stringify(db));
   }
@@ -234,6 +237,36 @@
     saveDb();
   }
 
+  function getAssignments() {
+    return state.assignments || [];
+  }
+
+  function addAssignment(assignment) {
+    if (!state.assignments) state.assignments = [];
+    state.assignments.unshift(assignment);
+    saveDb();
+  }
+
+  function deleteAssignment(id) {
+    if (!state.assignments) return;
+    state.assignments = state.assignments.filter(a => a.id !== id);
+    saveDb();
+  }
+
+  function updateAssignmentStatus(id, status) {
+    if (!state.assignments) return;
+    const assignment = state.assignments.find(a => a.id === id);
+    if (assignment) {
+      assignment.status = status;
+      if (status === 'completed') {
+        assignment.completedAt = new Date().toISOString();
+      } else {
+        assignment.completedAt = null;
+      }
+      saveDb();
+    }
+  }
+
   // --- ACCESSORS ---
   window.VisiQC.State = {
     state,
@@ -253,7 +286,12 @@
     
     getFilteredHistory,
     addHistory,
-    deleteHistory
+    deleteHistory,
+
+    getAssignments,
+    addAssignment,
+    deleteAssignment,
+    updateAssignmentStatus
   };
 
 })();

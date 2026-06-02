@@ -335,6 +335,141 @@
       .replace(/>/g, "&gt;");
   }
 
+  function renderAssignmentsQueue(assignments, clients, actions) {
+    const listContainer = document.getElementById('assignmentsCardsList');
+    const countLabel = document.getElementById('assignmentsCountLabel');
+    if (!listContainer) return;
+
+    if (countLabel) {
+      const activeCount = assignments.filter(a => a.status !== 'completed').length;
+      countLabel.textContent = `${activeCount} ACTIVE | ${assignments.length} TOTAL`;
+    }
+
+    if (assignments.length === 0) {
+      listContainer.innerHTML = `
+        <div class="no-assignments-state">
+          <span class="material-symbols-outlined">assignment_late</span>
+          <h5>No active assignments</h5>
+          <p>Requirements published by Suvrata, Alka, or Durgesh will appear in this list sorted by priority.</p>
+        </div>
+      `;
+      return;
+    }
+
+    // Sort assignments: priority weight (high=3, medium=2, low=1) descending, then by createdAt descending
+    const sorted = [...assignments].sort((a, b) => {
+      const pWeight = { high: 3, medium: 2, low: 1 };
+      const weightA = pWeight[a.priority] || 0;
+      const weightB = pWeight[b.priority] || 0;
+      if (weightB !== weightA) {
+        return weightB - weightA;
+      }
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+
+    listContainer.innerHTML = '';
+
+    sorted.forEach(item => {
+      const card = document.createElement('div');
+      card.className = `assignment-card priority-${item.priority}`;
+      card.dataset.id = item.id;
+
+      const client = clients.find(c => c.id === item.clientId);
+      const clientName = client ? client.name : 'General Brand';
+      
+      const statusLabel = item.status === 'in_progress' ? 'In Progress' : (item.status === 'completed' ? 'Completed' : 'Pending');
+      const statusBadgeClass = item.status === 'in_progress' ? 'status-badge-progress' : (item.status === 'completed' ? 'status-badge-completed' : 'status-badge-pending');
+
+      let refHTML = '';
+      if (item.refImage) {
+        refHTML = `
+          <div class="assignment-card-ref">
+            <img src="${item.refImage}" alt="Reference thumbnail">
+            <span title="${escapeHtmlOnly(item.refImageName || 'image.png')}">Ref: ${escapeHtmlOnly(item.refImageName || 'image.png')}</span>
+          </div>
+        `;
+      }
+
+      card.innerHTML = `
+        <div class="assignment-card-header">
+          <div class="assignment-card-title-group">
+            <h5 class="assignment-card-title">${escapeHtmlOnly(item.title)}</h5>
+            <div class="assignment-card-meta">
+              <span class="badge" style="background: rgba(79, 70, 229, 0.05); color: var(--accent-purple); font-weight: 700;">${escapeHtmlOnly(clientName)}</span>
+              <span class="badge">By: ${escapeHtmlOnly(item.requester)}</span>
+              <span class="status-badge ${statusBadgeClass}">${statusLabel}</span>
+            </div>
+          </div>
+          <button class="btn-card-delete" title="Delete requirement">
+            <span class="material-symbols-outlined" style="font-size: 16px;">delete</span>
+          </button>
+        </div>
+        <p class="assignment-card-desc">${escapeHtmlOnly(item.description)}</p>
+        ${refHTML}
+        <div class="assignment-card-footer">
+          <div class="assignment-status-wrapper">
+            <span style="font-size: 9.5px; text-transform: uppercase; font-weight: 700; color: var(--text-muted);">Status:</span>
+            <select class="req-status-select">
+              <option value="pending" ${item.status === 'pending' ? 'selected' : ''}>Pending</option>
+              <option value="in_progress" ${item.status === 'in_progress' ? 'selected' : ''}>In Progress</option>
+              <option value="completed" ${item.status === 'completed' ? 'selected' : ''}>Completed</option>
+            </select>
+          </div>
+          <div class="assignment-action-btns">
+            <button class="btn-card-action btn-visual-link">
+              <span class="material-symbols-outlined" style="font-size: 13px;">analytics</span>
+              Audit
+            </button>
+            <button class="btn-card-action btn-creator-link">
+              <span class="material-symbols-outlined" style="font-size: 13px;">draw</span>
+              Create
+            </button>
+          </div>
+        </div>
+      `;
+
+      // Attach Listeners
+      card.querySelector('.btn-card-delete').addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (confirm("Are you sure you want to delete this assignment?")) {
+          actions.onDelete(item.id);
+        }
+      });
+
+      card.querySelector('.req-status-select').addEventListener('change', (e) => {
+        actions.onStatusChange(item.id, e.target.value);
+      });
+
+      card.querySelector('.btn-visual-link').addEventListener('click', () => {
+        actions.onAuditLink(item);
+      });
+
+      card.querySelector('.btn-creator-link').addEventListener('click', () => {
+        actions.onCreatorLink(item);
+      });
+
+      listContainer.appendChild(card);
+    });
+  }
+
+  function renderAssignmentsFormDropdowns(clients) {
+    const filterSelect = document.getElementById('filterReqClient');
+    const formSelect = document.getElementById('reqClientSelect');
+    
+    if (formSelect) {
+      formSelect.innerHTML = clients.map(c => 
+        `<option value="${c.id}">${escapeHtmlOnly(c.name)}</option>`
+      ).join('');
+    }
+
+    if (filterSelect) {
+      const options = clients.map(c => 
+        `<option value="${c.id}">${escapeHtmlOnly(c.name)}</option>`
+      );
+      filterSelect.innerHTML = '<option value="all">All Clients</option>' + options.join('');
+    }
+  }
+
   // --- ACCESSORS ---
   window.VisiQC.Render = {
     renderClientsDropdown,
@@ -343,7 +478,9 @@
     renderHistory,
     displayCritiqueReport,
     displayTextReport,
-    escapeHtmlOnly
+    escapeHtmlOnly,
+    renderAssignmentsQueue,
+    renderAssignmentsFormDropdowns
   };
 
 })();

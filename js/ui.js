@@ -11,6 +11,8 @@
   const Render = window.VisiQC.Render;
 
   let activeNeuralScanner = null;
+  let assignmentRefImageBase64 = null;
+  let assignmentRefImageName = '';
 
   // --- AI NEURAL SCANNER CANVAS ANIMATION ENGINE ---
   class NeuralScanner {
@@ -353,6 +355,7 @@
     bindVisualAuditPanel();
     bindCopyEditorPanel();
     bindB2BResearchPanel();
+    bindAssignmentsPanel();
     bindExports();
     
     // Perform initial workspace render
@@ -366,6 +369,7 @@
     
     // Render clients dropdowns
     Render.renderClientsDropdown(clients, activeClientId);
+    Render.renderAssignmentsFormDropdowns(clients);
     
     // Get projects for active client
     const projects = State.getProjects(activeClientId);
@@ -397,6 +401,9 @@
       btnDelProj.style.display = (activeProjectId === 'default_project') ? 'none' : 'inline-flex';
     }
     
+    // Refresh assignments queue
+    refreshAssignmentsList();
+
     // Reset panels visual states on client/project swap
     resetVisualState();
   }
@@ -1332,14 +1339,19 @@
     const workspaceGrid = document.querySelector('.workspace-grid');
     const workspaceHeaderRow = document.querySelector('.workspace-header-row');
 
+    const tabAssignments = document.getElementById('tabAssignments');
+    const assignmentsTabContent = document.getElementById('assignmentsTabContent');
+
     tabVisual.addEventListener('click', () => {
       tabVisual.classList.add('active');
       if (tabCreator) tabCreator.classList.remove('active');
       if (tabResearch) tabResearch.classList.remove('active');
+      if (tabAssignments) tabAssignments.classList.remove('active');
       tabText.classList.remove('active');
       visualTabContent.classList.remove('hidden');
       if (creatorTabContent) creatorTabContent.classList.add('hidden');
       if (researchTabContent) researchTabContent.classList.add('hidden');
+      if (assignmentsTabContent) assignmentsTabContent.classList.add('hidden');
       textTabContent.classList.add('hidden');
 
       // Restore 2-column layout
@@ -1355,9 +1367,11 @@
         tabVisual.classList.remove('active');
         tabText.classList.remove('active');
         if (tabResearch) tabResearch.classList.remove('active');
+        if (tabAssignments) tabAssignments.classList.remove('active');
         if (creatorTabContent) creatorTabContent.classList.remove('hidden');
         visualTabContent.classList.add('hidden');
         if (researchTabContent) researchTabContent.classList.add('hidden');
+        if (assignmentsTabContent) assignmentsTabContent.classList.add('hidden');
         textTabContent.classList.add('hidden');
         
         // Auto-load creator canvas layout preset when displaying creator tab
@@ -1378,10 +1392,12 @@
       tabVisual.classList.remove('active');
       if (tabCreator) tabCreator.classList.remove('active');
       if (tabResearch) tabResearch.classList.remove('active');
+      if (tabAssignments) tabAssignments.classList.remove('active');
       textTabContent.classList.remove('hidden');
       visualTabContent.classList.add('hidden');
       if (creatorTabContent) creatorTabContent.classList.add('hidden');
       if (researchTabContent) researchTabContent.classList.add('hidden');
+      if (assignmentsTabContent) assignmentsTabContent.classList.add('hidden');
 
       // Restore 2-column layout
       if (workspaceGrid) workspaceGrid.classList.remove('full-width');
@@ -1396,10 +1412,12 @@
         tabVisual.classList.remove('active');
         tabText.classList.remove('active');
         if (tabCreator) tabCreator.classList.remove('active');
+        if (tabAssignments) tabAssignments.classList.remove('active');
         if (researchTabContent) researchTabContent.classList.remove('hidden');
         visualTabContent.classList.add('hidden');
         textTabContent.classList.add('hidden');
         if (creatorTabContent) creatorTabContent.classList.add('hidden');
+        if (assignmentsTabContent) assignmentsTabContent.classList.add('hidden');
 
         // Hide right panel and set full width for research dashboard
         if (workspaceGrid) workspaceGrid.classList.add('full-width');
@@ -2078,6 +2096,335 @@
     flushBlueprint();
     html += '</div>';
     return html;
+  }
+
+  // --- CREATIVE ASSIGNMENTS & REQUIREMENTS BINDERS ---
+  function compressRefImage(file, callback) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxDim = 500;
+        let w = img.width;
+        let h = img.height;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) {
+            h = Math.round((h * maxDim) / w);
+            w = maxDim;
+          } else {
+            w = Math.round((w * maxDim) / h);
+            h = maxDim;
+          }
+        }
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        callback(dataUrl);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handleAssignmentRefFile(file) {
+    if (!file.type.startsWith('image/')) {
+      alert("Only image files are supported as creative references.");
+      return;
+    }
+
+    const reqRefPlaceholder = document.getElementById('reqRefPlaceholder');
+    const reqRefPreviewContainer = document.getElementById('reqRefPreviewContainer');
+    const reqRefPreviewImg = document.getElementById('reqRefPreviewImg');
+    const reqRefFileName = document.getElementById('reqRefFileName');
+
+    compressRefImage(file, (base64) => {
+      assignmentRefImageBase64 = base64;
+      assignmentRefImageName = file.name;
+
+      if (reqRefPreviewImg) reqRefPreviewImg.src = base64;
+      if (reqRefFileName) reqRefFileName.textContent = file.name;
+
+      if (reqRefPlaceholder) reqRefPlaceholder.classList.add('hidden');
+      if (reqRefPreviewContainer) reqRefPreviewContainer.classList.remove('hidden');
+    });
+  }
+
+  function clearAssignmentRefFile() {
+    assignmentRefImageBase64 = null;
+    assignmentRefImageName = '';
+    const reqRefFileInput = document.getElementById('reqRefFileInput');
+    if (reqRefFileInput) reqRefFileInput.value = '';
+
+    const reqRefPlaceholder = document.getElementById('reqRefPlaceholder');
+    const reqRefPreviewContainer = document.getElementById('reqRefPreviewContainer');
+    const reqRefPreviewImg = document.getElementById('reqRefPreviewImg');
+
+    if (reqRefPreviewImg) reqRefPreviewImg.src = '';
+    if (reqRefPlaceholder) reqRefPlaceholder.classList.remove('hidden');
+    if (reqRefPreviewContainer) reqRefPreviewContainer.classList.add('hidden');
+  }
+
+  function refreshAssignmentsList() {
+    const assignments = State.getAssignments();
+    const clients = State.getClients();
+
+    const filterReqClient = document.getElementById('filterReqClient');
+    const filterReqRequester = document.getElementById('filterReqRequester');
+    const filterReqStatus = document.getElementById('filterReqStatus');
+
+    const clientFilter = filterReqClient ? filterReqClient.value : 'all';
+    const requesterFilter = filterReqRequester ? filterReqRequester.value : 'all';
+    const statusFilter = filterReqStatus ? filterReqStatus.value : 'all';
+
+    const filtered = assignments.filter(item => {
+      const matchClient = clientFilter === 'all' || item.clientId === clientFilter;
+      const matchRequester = requesterFilter === 'all' || item.requester === requesterFilter;
+      const matchStatus = statusFilter === 'all' || item.status === statusFilter;
+      return matchClient && matchRequester && matchStatus;
+    });
+
+    Render.renderAssignmentsQueue(filtered, clients, {
+      onDelete: (id) => {
+        State.deleteAssignment(id);
+        refreshAssignmentsList();
+      },
+      onStatusChange: (id, status) => {
+        State.updateAssignmentStatus(id, status);
+        refreshAssignmentsList();
+      },
+      onAuditLink: (item) => {
+        // Deep link to Visual Audit!
+        // 1. Switch client & reload workspace
+        State.state.activeClientId = item.clientId;
+        State.saveActiveState();
+        reloadWorkspace();
+        
+        // 2. Select client dropdown in sidebar
+        const clientSelector = document.getElementById('clientSelector');
+        if (clientSelector) {
+          clientSelector.value = item.clientId;
+        }
+
+        // 3. Setup target format if detected
+        const platformSelector = document.getElementById('platformSelector');
+        if (platformSelector) {
+          if (item.title.toLowerCase().includes('reel') || item.title.toLowerCase().includes('story')) {
+            platformSelector.value = 'instagram_story';
+          } else if (item.title.toLowerCase().includes('post') || item.title.toLowerCase().includes('square')) {
+            platformSelector.value = 'instagram_post';
+          } else if (item.title.toLowerCase().includes('linkedin')) {
+            platformSelector.value = 'linkedin_creative';
+          } else {
+            platformSelector.value = 'auto';
+          }
+        }
+
+        // 4. Preload reference image in Visual Audit panel if present
+        if (item.refImage) {
+          State.state.currentImageBase64 = item.refImage;
+          State.state.currentImageMimeType = 'image/jpeg';
+          State.state.currentImageName = item.refImageName || 'assignment_reference.jpg';
+          
+          const previewImage = document.getElementById('previewImage');
+          const previewContainer = document.getElementById('previewContainer');
+          const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+          const analyzeBtn = document.getElementById('analyzeBtn');
+          const resetBtn = document.getElementById('resetBtn');
+          const imgName = document.getElementById('imgName');
+          
+          if (previewImage) previewImage.src = item.refImage;
+          if (imgName) imgName.textContent = item.refImageName || 'assignment_reference.jpg';
+          if (uploadPlaceholder) uploadPlaceholder.classList.add('hidden');
+          if (previewContainer) previewContainer.classList.remove('hidden');
+          if (analyzeBtn) analyzeBtn.removeAttribute('disabled');
+          if (resetBtn) resetBtn.removeAttribute('disabled');
+        }
+
+        // 5. Trigger tab toggle
+        const tabVisual = document.getElementById('tabVisual');
+        if (tabVisual) tabVisual.click();
+      },
+      onCreatorLink: (item) => {
+        // Deep link to AI Creator!
+        // 1. Switch client
+        State.state.activeClientId = item.clientId;
+        State.saveActiveState();
+        reloadWorkspace();
+        
+        const clientSelector = document.getElementById('clientSelector');
+        if (clientSelector) {
+          clientSelector.value = item.clientId;
+        }
+
+        // 2. Pre-fill AI prompt box
+        const creatorPromptText = document.getElementById('creatorPromptText');
+        if (creatorPromptText) {
+          creatorPromptText.value = `A professional visual advertisement: ${item.title}.\nContext: ${item.description}`;
+        }
+
+        // 3. Set creator format matching the title if possible
+        const creatorTargetFormat = document.getElementById('creatorTargetFormat');
+        if (creatorTargetFormat) {
+          if (item.title.toLowerCase().includes('reel') || item.title.toLowerCase().includes('story')) {
+            creatorTargetFormat.value = '1080x1920';
+          } else if (item.title.toLowerCase().includes('post') || item.title.toLowerCase().includes('square')) {
+            creatorTargetFormat.value = '1080x1080';
+          } else if (item.title.toLowerCase().includes('linkedin')) {
+            creatorTargetFormat.value = '1200x630';
+          }
+        }
+
+        // 4. Switch tab
+        const tabCreator = document.getElementById('tabCreator');
+        if (tabCreator) tabCreator.click();
+      }
+    });
+  }
+
+  function bindAssignmentsPanel() {
+    const tabAssignments = document.getElementById('tabAssignments');
+    const assignmentsTabContent = document.getElementById('assignmentsTabContent');
+    const visualTabContent = document.getElementById('visualTabContent');
+    const creatorTabContent = document.getElementById('creatorTabContent');
+    const textTabContent = document.getElementById('textTabContent');
+    const researchTabContent = document.getElementById('researchTabContent');
+
+    const workspaceGrid = document.querySelector('.workspace-grid');
+    const workspaceHeaderRow = document.querySelector('.workspace-header-row');
+    const panelRight = document.querySelector('.panel-right');
+    const rightReportGroup = document.querySelector('.right-report-group');
+
+    if (!tabAssignments) return;
+
+    tabAssignments.addEventListener('click', () => {
+      // Toggle active states
+      document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+      tabAssignments.classList.add('active');
+
+      // Hide all content areas and show assignments
+      visualTabContent.classList.add('hidden');
+      if (creatorTabContent) creatorTabContent.classList.add('hidden');
+      if (textTabContent) textTabContent.classList.add('hidden');
+      if (researchTabContent) researchTabContent.classList.add('hidden');
+      assignmentsTabContent.classList.remove('hidden');
+
+      // Set to full width layout (like research and creator)
+      if (workspaceGrid) workspaceGrid.classList.add('full-width');
+      if (workspaceHeaderRow) workspaceHeaderRow.classList.add('full-width');
+      if (panelRight) panelRight.classList.add('hidden');
+      if (rightReportGroup) rightReportGroup.classList.add('hidden');
+
+      // Refresh assignments dropdowns & list
+      const clients = State.getClients();
+      Render.renderAssignmentsFormDropdowns(clients);
+      refreshAssignmentsList();
+    });
+
+    // Handle reference image selection
+    const reqRefDropZone = document.getElementById('reqRefDropZone');
+    const reqRefFileInput = document.getElementById('reqRefFileInput');
+    const reqRefPlaceholder = document.getElementById('reqRefPlaceholder');
+    const reqRefPreviewContainer = document.getElementById('reqRefPreviewContainer');
+    const reqRefPreviewImg = document.getElementById('reqRefPreviewImg');
+    const reqRefFileName = document.getElementById('reqRefFileName');
+    const btnRemoveReqRef = document.getElementById('btnRemoveReqRef');
+
+    if (reqRefDropZone && reqRefFileInput) {
+      reqRefDropZone.addEventListener('click', (e) => {
+        if (e.target.closest('#btnRemoveReqRef')) return;
+        reqRefFileInput.click();
+      });
+
+      reqRefFileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          handleAssignmentRefFile(e.target.files[0]);
+        }
+      });
+
+      // Drag and Drop listeners
+      reqRefDropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        reqRefDropZone.style.borderColor = 'var(--accent-purple)';
+        reqRefDropZone.style.background = 'rgba(79, 70, 229, 0.05)';
+      });
+
+      reqRefDropZone.addEventListener('dragleave', () => {
+        reqRefDropZone.style.borderColor = 'var(--border-color)';
+        reqRefDropZone.style.background = 'rgba(255,255,255,0.3)';
+      });
+
+      reqRefDropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        reqRefDropZone.style.borderColor = 'var(--border-color)';
+        reqRefDropZone.style.background = 'rgba(255,255,255,0.3)';
+        if (e.dataTransfer.files.length > 0) {
+          handleAssignmentRefFile(e.dataTransfer.files[0]);
+        }
+      });
+    }
+
+    if (btnRemoveReqRef) {
+      btnRemoveReqRef.addEventListener('click', (e) => {
+        e.stopPropagation();
+        clearAssignmentRefFile();
+      });
+    }
+
+    // Submit form handler
+    const assignmentForm = document.getElementById('assignmentForm');
+    if (assignmentForm) {
+      assignmentForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const clientId = document.getElementById('reqClientSelect').value;
+        const title = document.getElementById('reqTitleInput').value.trim();
+        const requester = document.getElementById('reqRequesterSelect').value;
+        const priority = document.getElementById('reqPrioritySelect').value;
+        const description = document.getElementById('reqDescInput').value.trim();
+
+        if (!title || !description) {
+          alert("Please fill in all required fields.");
+          return;
+        }
+
+        const newAssignment = {
+          id: 'asg_' + Date.now(),
+          clientId,
+          title,
+          requester,
+          priority,
+          description,
+          refImage: assignmentRefImageBase64,
+          refImageName: assignmentRefImageName,
+          status: 'pending',
+          createdAt: new Date().toISOString(),
+          completedAt: null
+        };
+
+        State.addAssignment(newAssignment);
+        
+        // Reset form
+        assignmentForm.reset();
+        clearAssignmentRefFile();
+        
+        // Re-render
+        refreshAssignmentsList();
+      });
+    }
+
+    // Filter Listeners
+    const filterReqClient = document.getElementById('filterReqClient');
+    const filterReqRequester = document.getElementById('filterReqRequester');
+    const filterReqStatus = document.getElementById('filterReqStatus');
+
+    [filterReqClient, filterReqRequester, filterReqStatus].forEach(filter => {
+      if (filter) {
+        filter.addEventListener('change', refreshAssignmentsList);
+      }
+    });
   }
 
   // --- REPORT EXPORTS ---

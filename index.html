@@ -21,6 +21,7 @@
   <link rel="stylesheet" href="css/scanner.css">
   <link rel="stylesheet" href="css/editor.css">
   <link rel="stylesheet" href="css/chat.css">
+  <link rel="stylesheet" href="css/assignments.css">
 </head>
 <body>
 
@@ -236,11 +237,10 @@
             <span class="material-symbols-outlined">draw</span>
             AI Creator
           </button>
-        </div>
-        
-        <div class="right-report-group hidden">
-          <h3>Audit Reports & QC Results</h3>
-          <span class="badge" id="qcScoreBadge">READY</span>
+          <button class="panel-tab" id="tabAssignments" title="Creative Requirements Queue">
+            <span class="material-symbols-outlined">assignment</span>
+            Assignments
+          </button>
         </div>
       </div>
 
@@ -759,10 +759,129 @@
 
             </div>
           </div>
+
+          <!-- Tab 5: Creative Assignments & Requirements Content -->
+          <div id="assignmentsTabContent" class="tab-content-wrapper hidden" style="display: grid; grid-template-columns: 1.15fr 1.35fr; flex-grow: 1; overflow: hidden; height: 100%;">
+            <!-- Left Side: Upload / Add Requirement Form -->
+            <div class="assignments-form-container" style="border-right: 1px solid var(--border-color); padding: 24px 32px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto;">
+              <div class="section-title-wrapper" style="display: flex; flex-direction: column; gap: 6px;">
+                <h4 style="font-size: 14px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px; margin: 0;">
+                  <span class="material-symbols-outlined" style="color: var(--accent-purple); font-variation-settings: 'FILL' 1;">add_task</span>
+                  Add Creative Requirement
+                </h4>
+                <p style="font-size: 11px; color: var(--text-secondary); margin: 0; line-height: 1.4;">
+                  Upload campaign briefs, asset dimensions, and references for the creative team.
+                </p>
+              </div>
+              
+              <form id="assignmentForm" style="display: flex; flex-direction: column; gap: 14px;">
+                <div class="form-group" style="display: flex; flex-direction: column; gap: 4px;">
+                  <label for="reqClientSelect" style="font-size: 10px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Client / Brand</label>
+                  <select id="reqClientSelect" class="workspace-select" style="width: 100%;" required>
+                    <!-- Populated dynamically -->
+                  </select>
+                </div>
+                
+                <div class="form-group" style="display: flex; flex-direction: column; gap: 4px;">
+                  <label for="reqTitleInput" style="font-size: 10px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Requirement Title</label>
+                  <input type="text" id="reqTitleInput" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); color: var(--text-primary); padding: 10px 14px; font-size: 13px; font-family: var(--font-body); outline: none;" placeholder="e.g. static summer belt all sizes, RVNL Kazipet Reel" required>
+                </div>
+                
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                  <div class="form-group" style="flex: 1; min-width: 120px; display: flex; flex-direction: column; gap: 4px;">
+                    <label for="reqRequesterSelect" style="font-size: 10px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Requested By</label>
+                    <select id="reqRequesterSelect" class="workspace-select" style="width: 100%;" required>
+                      <option value="Suvrata">Suvrata</option>
+                      <option value="Alka">Alka</option>
+                      <option value="Durgesh">Durgesh</option>
+                    </select>
+                  </div>
+                  
+                  <div class="form-group" style="flex: 1; min-width: 120px; display: flex; flex-direction: column; gap: 4px;">
+                    <label for="reqPrioritySelect" style="font-size: 10px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Priority</label>
+                    <select id="reqPrioritySelect" class="workspace-select" style="width: 100%;" required>
+                      <option value="high">🚨 High Priority</option>
+                      <option value="medium">⚡ Medium Priority</option>
+                      <option value="low">💤 Low Priority</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="form-group" style="display: flex; flex-direction: column; gap: 4px;">
+                  <label for="reqDescInput" style="font-size: 10px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Specifications & Guidelines</label>
+                  <textarea id="reqDescInput" rows="3" style="width: 100%; resize: none; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); color: var(--text-primary); padding: 10px 14px; font-size: 12px; font-family: var(--font-body); outline: none; line-height: 1.4;" placeholder="Describe dimensions, visual goals, key headlines, or target platform details..." required></textarea>
+                </div>
+
+                <!-- Upload reference image / assets -->
+                <div class="form-group" style="display: flex; flex-direction: column; gap: 4px;">
+                  <label style="font-size: 10px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Reference Creative (Optional)</label>
+                  <div class="upload-reference-zone" id="reqRefDropZone" style="border: 1px dashed var(--border-color); padding: 12px; border-radius: var(--border-radius-sm); text-align: center; background: rgba(255,255,255,0.3); transition: var(--transition-smooth); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80px;">
+                    <input type="file" id="reqRefFileInput" accept="image/*" style="display: none;">
+                    <div id="reqRefPlaceholder">
+                      <span class="material-symbols-outlined" style="font-size: 20px; color: var(--text-muted);">image</span>
+                      <p style="font-size: 9.5px; margin: 4px 0 0; color: var(--text-secondary);">Drag reference image or click to browse</p>
+                    </div>
+                    <div id="reqRefPreviewContainer" class="hidden" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                      <div style="display: flex; align-items: center; gap: 8px; min-width: 0; width: 100%;">
+                        <img id="reqRefPreviewImg" src="" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-color); flex-shrink: 0;">
+                        <span id="reqRefFileName" style="font-size: 11px; color: var(--text-primary); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px;">file.png</span>
+                      </div>
+                      <button type="button" id="btnRemoveReqRef" style="background: transparent; border: none; color: var(--color-danger); cursor: pointer; display: flex; align-items: center; padding: 4px; flex-shrink: 0;"><span class="material-symbols-outlined" style="font-size: 16px;">delete</span></button>
+                    </div>
+                  </div>
+                </div>
+
+                <button class="btn btn-primary btn-full" id="btnCreateAssignment" type="submit" style="margin-top: 6px;">
+                  <span class="material-symbols-outlined">playlist_add</span>
+                  Publish Creative Assignment
+                </button>
+              </form>
+            </div>
+            
+            <!-- Right Side: Requirements List / Queue -->
+            <div class="assignments-queue-container" style="padding: 24px 32px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; background: rgba(255, 255, 255, 0.02);">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 14px;">
+                <div>
+                  <h4 style="font-size: 14px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">
+                    Active Creative Queue
+                  </h4>
+                  <span id="assignmentsCountLabel" style="font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); text-transform: uppercase;">0 ASSIGNMENTS TOTAL</span>
+                </div>
+                
+                <!-- Filter Badges / Dropdowns -->
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <select id="filterReqClient" class="workspace-select" style="width: auto; padding: 4px 8px; font-size: 11px;">
+                    <option value="all">All Clients</option>
+                  </select>
+                  <select id="filterReqRequester" class="workspace-select" style="width: auto; padding: 4px 8px; font-size: 11px;">
+                    <option value="all">All Requesters</option>
+                    <option value="Suvrata">Suvrata</option>
+                    <option value="Alka">Alka</option>
+                    <option value="Durgesh">Durgesh</option>
+                  </select>
+                  <select id="filterReqStatus" class="workspace-select" style="width: auto; padding: 4px 8px; font-size: 11px;">
+                    <option value="all">All Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                  </select>
+                </div>
+              </div>
+              
+              <!-- Queue Cards Container -->
+              <div id="assignmentsCardsList" style="display: flex; flex-direction: column; gap: 12px; flex-grow: 1;">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+          </div>
         </section>
 
         <!-- Right Panel: Diagnostic Report Console -->
         <section class="workspace-panel panel-right hidden">
+          <div class="right-report-group hidden">
+            <h3>Audit Reports & QC Results</h3>
+            <span class="badge" id="qcScoreBadge">READY</span>
+          </div>
           <div class="results-container">
             
             <!-- 1. Initial State: Upload prompt -->
