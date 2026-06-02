@@ -267,6 +267,33 @@
     }
   }
 
+  // --- DAILY REQUEST COUNT FOR GEMINI ---
+  function getGeminiRequestsCount() {
+    const today = new Date().toDateString();
+    const dataRaw = localStorage.getItem('visiqc_gemini_usage');
+    if (dataRaw) {
+      try {
+        const parsed = JSON.parse(dataRaw);
+        if (parsed.date === today) {
+          return parsed.count || 0;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return 0;
+  }
+
+  function incrementGeminiRequestsCount() {
+    const today = new Date().toDateString();
+    const count = getGeminiRequestsCount() + 1;
+    localStorage.setItem('visiqc_gemini_usage', JSON.stringify({ date: today, count }));
+    if (window.VisiQC.Ui && window.VisiQC.Ui.updateCreditsDisplay) {
+      window.VisiQC.Ui.updateCreditsDisplay();
+    }
+    return count;
+  }
+
   // --- ACCESSORS ---
   window.VisiQC.State = {
     state,
@@ -291,7 +318,9 @@
     getAssignments,
     addAssignment,
     deleteAssignment,
-    updateAssignmentStatus
+    updateAssignmentStatus,
+    getGeminiRequestsCount,
+    incrementGeminiRequestsCount
   };
 
 })();

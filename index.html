@@ -173,6 +173,14 @@
               <option value="gemini-1.5-flash">Gemini 1.5 Flash (Legacy Fast)</option>
             </select>
           </div>
+
+          <div class="control-group" id="creditsControlGroup">
+            <label>API Limits</label>
+            <div class="credits-display-badge" id="creditsDisplayBadge" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.65); border: 1px solid var(--border-color); color: var(--text-primary); padding: 8px 14px; font-size: 12px; border-radius: var(--border-radius-sm); font-weight: 500; font-family: var(--font-body); height: 38px; box-shadow: 0 4px 10px rgba(13, 12, 27, 0.02); box-sizing: border-box;" title="Daily limit for Gemini Free Tier">
+              <span class="material-symbols-outlined" id="creditsIcon" style="font-size: 16px; color: var(--accent-purple);">token</span>
+              <span id="creditsText">1,500 left today</span>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -221,7 +229,11 @@
         
         <!-- Tabs toggles split -->
         <div class="left-tabs-group">
-          <button class="panel-tab active" id="tabResearch" title="Launch B2B Trend Research">
+          <button class="panel-tab active" id="tabAssignments" title="Creative Requirements Queue">
+            <span class="material-symbols-outlined">assignment</span>
+            Assignments
+          </button>
+          <button class="panel-tab" id="tabResearch" title="Launch B2B Trend Research">
             <span class="material-symbols-outlined">explore</span>
             B2B Trends
           </button>
@@ -229,17 +241,13 @@
             <span class="material-symbols-outlined">edit_note</span>
             Copy & Tone Editor
           </button>
-          <button class="panel-tab" id="tabVisual">
-            <span class="material-symbols-outlined">image</span>
-            Visual Audit
-          </button>
           <button class="panel-tab" id="tabCreator" title="Launch AI Image Creator">
             <span class="material-symbols-outlined">draw</span>
             AI Creator
           </button>
-          <button class="panel-tab" id="tabAssignments" title="Creative Requirements Queue">
-            <span class="material-symbols-outlined">assignment</span>
-            Assignments
+          <button class="panel-tab" id="tabVisual">
+            <span class="material-symbols-outlined">image</span>
+            Visual Audit
           </button>
         </div>
       </div>
@@ -464,7 +472,7 @@
           </div>
 
           <!-- Tab 2.5 (Rendered as Tab 3): B2B Trend Research Content -->
-          <div id="researchTabContent" class="tab-content-wrapper" style="display: flex; flex-direction: column; flex-grow: 1; overflow: hidden; height: 100%;">
+          <div id="researchTabContent" class="tab-content-wrapper hidden" style="display: flex; flex-direction: column; flex-grow: 1; overflow: hidden; height: 100%;">
             <div class="research-container" style="flex-grow: 1; padding: 24px 32px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto;">
               
               <!-- Topic Input and Search block -->
@@ -761,7 +769,7 @@
           </div>
 
           <!-- Tab 5: Creative Assignments & Requirements Content -->
-          <div id="assignmentsTabContent" class="tab-content-wrapper hidden" style="display: grid; grid-template-columns: 1.15fr 1.35fr; flex-grow: 1; overflow: hidden; height: 100%;">
+          <div id="assignmentsTabContent" class="tab-content-wrapper" style="display: grid; grid-template-columns: 1.15fr 1.35fr; flex-grow: 1; overflow: hidden; height: 100%;">
             <!-- Left Side: Upload / Add Requirement Form -->
             <div class="assignments-form-container" style="border-right: 1px solid var(--border-color); padding: 24px 32px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto;">
               <div class="section-title-wrapper" style="display: flex; flex-direction: column; gap: 6px;">

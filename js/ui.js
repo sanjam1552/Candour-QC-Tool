@@ -360,6 +360,9 @@
     
     // Perform initial workspace render
     reloadWorkspace();
+
+    // Update API limits usage display
+    updateCreditsDisplay();
   }
 
   // --- WORKSPACE RELOAD COORDINATOR ---
@@ -578,6 +581,8 @@
         el.modelSelector.setAttribute('disabled', 'true');
         updateStatusIndicator(true, `Engine active (Local Ollama: ${model}).`);
       }
+
+      updateCreditsDisplay();
       
       closeSettings();
     });
@@ -1179,6 +1184,7 @@
       const mimeType = State.state.currentImageMimeType;
 
       if (State.state.connectionType === 'gemini') {
+        State.incrementGeminiRequestsCount();
         const selectedModel = el.modelSelector.value;
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${State.state.apiKey}`;
         const payload = {
@@ -1496,6 +1502,7 @@
       try {
         let generatedText = "";
         if (State.state.connectionType === 'gemini') {
+          State.incrementGeminiRequestsCount();
           const selectedModel = document.getElementById('modelSelector').value;
           const url = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${State.state.apiKey}`;
           const response = await Api.fetchWithRetry(url, {
@@ -1606,6 +1613,7 @@
         const prompt = Api.buildTextInspectionPrompt(sourceText, toneDesc, clientObj, projectObj, State.state.customInstructions);
 
         if (State.state.connectionType === 'gemini') {
+          State.incrementGeminiRequestsCount();
           const selectedModel = el.modelSelector.value;
           const url = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${State.state.apiKey}`;
           const response = await Api.fetchWithRetry(url, {
@@ -1830,6 +1838,7 @@
           throw new Error("Missing API Key. Please open 'Configure Engine' and enter a valid Gemini API Key.");
         }
 
+        State.incrementGeminiRequestsCount();
         const selectedModel = el.modelSelector.value;
         const prompt = Api.buildB2BResearchPrompt(topic, industry);
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:streamGenerateContent?key=${apiKey}`;
@@ -2903,10 +2912,40 @@
     };
   }
 
+  function updateCreditsDisplay() {
+    const creditsText = document.getElementById('creditsText');
+    const creditsIcon = document.getElementById('creditsIcon');
+    const creditsDisplayBadge = document.getElementById('creditsDisplayBadge');
+    if (!creditsText) return;
+
+    if (State.state.connectionType === 'gemini') {
+      const count = State.getGeminiRequestsCount();
+      const left = Math.max(0, 1500 - count);
+      creditsText.textContent = `${left.toLocaleString()} left today`;
+      if (creditsIcon) {
+        creditsIcon.textContent = 'token';
+        creditsIcon.style.color = 'var(--accent-purple)';
+      }
+      if (creditsDisplayBadge) {
+        creditsDisplayBadge.title = `Gemini Free Tier Daily Quota: Used ${count} / 1500 requests today`;
+      }
+    } else {
+      creditsText.textContent = 'Unlimited (Local)';
+      if (creditsIcon) {
+        creditsIcon.textContent = 'all_inclusive';
+        creditsIcon.style.color = 'var(--color-success)';
+      }
+      if (creditsDisplayBadge) {
+        creditsDisplayBadge.title = 'Local Ollama requests are completely unlimited and free';
+      }
+    }
+  }
+
   // --- ACCESSORS ---
   window.VisiQC.Ui = {
     initUi,
-    reloadWorkspace
+    reloadWorkspace,
+    updateCreditsDisplay
   };
 
 })();
