@@ -1824,7 +1824,7 @@
         }
       }, 300);
 
-      // 3. Make the API Call to Gemini
+      // 3. Make the API Call to Gemini (Streaming)
       try {
         const apiKey = State.state.apiKey;
         if (!apiKey) {
@@ -1833,7 +1833,7 @@
 
         const selectedModel = el.modelSelector.value;
         const prompt = Api.buildB2BResearchPrompt(topic, industry);
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:streamGenerateContent?key=${apiKey}`;
 
         const requestBody = {
           contents: [{ parts: [{ text: prompt }] }],
@@ -1843,7 +1843,7 @@
           }
         };
 
-        const response = await Api.fetchWithRetry(url, {
+        const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(requestBody)
@@ -1855,44 +1855,9 @@
           throw new Error(`Gemini API Error: ${errMsg}`);
         }
 
-        const result = await response.json();
-        const rawResponseText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-        
-        if (!rawResponseText) {
-          throw new Error("Received empty or invalid response from Gemini API.");
-        }
-
-        // 4. Parse response parts based on markers
-        const parsedReport = parseResearchReport(rawResponseText);
-
-        // 5. Render results
-        reportTopicTitle.textContent = `${topic} (${industry})`;
-        reportTimestamp.textContent = `Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}`;
-        researchModelBadge.textContent = selectedModel;
-
-        // Render LinkedIn Grid
-        researchLinkedInTraction.innerHTML = formatMarkdownToHTML(parsedReport.linkedin.traction || "No traction topics found.");
-        researchLinkedInFormulas.innerHTML = formatPostFormulasToHTML(parsedReport.linkedin.formulas || "No formulas found.");
-        researchLinkedInKeywords.innerHTML = formatKeywordsToHTML(parsedReport.linkedin.keywords || "No keywords found.");
-        researchLinkedInPlan.innerHTML = formatMarkdownToHTML(parsedReport.linkedin.plan || "No action recommendations found.");
-
-        // Render Meta Grid
-        researchMetaTraction.innerHTML = formatMarkdownToHTML(parsedReport.meta.traction || "No traction topics found.");
-        researchMetaFormulas.innerHTML = formatPostFormulasToHTML(parsedReport.meta.formulas || "No formulas found.");
-        researchMetaKeywords.innerHTML = formatKeywordsToHTML(parsedReport.meta.keywords || "No keywords found.");
-        researchMetaPlan.innerHTML = formatMarkdownToHTML(parsedReport.meta.plan || "No action recommendations found.");
-
-        // Render X Grid
-        researchXTraction.innerHTML = formatMarkdownToHTML(parsedReport.x.traction || "No traction topics found.");
-        researchXFormulas.innerHTML = formatPostFormulasToHTML(parsedReport.x.formulas || "No formulas found.");
-        researchXKeywords.innerHTML = formatKeywordsToHTML(parsedReport.x.keywords || "No keywords found.");
-        researchXPlan.innerHTML = formatMarkdownToHTML(parsedReport.x.plan || "No action recommendations found.");
-
-        // Render Print Grid
-        researchPrintTraction.innerHTML = formatMarkdownToHTML(parsedReport.print.traction || "No traction topics found.");
-        researchPrintFormulas.innerHTML = formatPostFormulasToHTML(parsedReport.print.formulas || "No formulas found.");
-        researchPrintKeywords.innerHTML = formatKeywordsToHTML(parsedReport.print.keywords || "No keywords found.");
-        researchPrintPlan.innerHTML = formatMarkdownToHTML(parsedReport.print.plan || "No action recommendations found.");
+        // Show dashboard immediately so results populate in real-time
+        researchLoadingState.classList.add('hidden');
+        researchResultsDashboard.classList.remove('hidden');
 
         // Reset sub-tabs to LinkedIn
         channelTabs.forEach(t => t.classList.remove('active'));
@@ -1903,15 +1868,47 @@
         const defaultGrid = document.getElementById('gridLinkedIn');
         if (defaultGrid) defaultGrid.classList.remove('hidden');
 
-        // 6. Transition state
-        researchLoadingState.classList.add('hidden');
-        researchResultsDashboard.classList.remove('hidden');
+        // Setup real-time helper values
+        reportTopicTitle.textContent = `${topic} (${industry})`;
+        reportTimestamp.textContent = `Generating live search intelligence...`;
+        researchModelBadge.textContent = selectedModel;
+
+        // Render initial shimmer states
+        renderResearchReportData({}, selectedModel, topic, industry);
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let buffer = "";
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+
+          const textChunk = decoder.decode(value, { stream: true });
+          buffer += textChunk;
+
+          // Parse and extract chunks text
+          const accumulatedText = parseStreamChunks(buffer);
+          
+          // Parse report sections
+          const parsedReport = parseResearchReport(accumulatedText);
+          
+          // Render progress in real-time
+          renderResearchReportData(parsedReport, selectedModel, topic, industry);
+        }
+
+        // Update timestamp with completed status
+        reportTimestamp.textContent = `Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}`;
         el.qcScoreBadge.textContent = 'COMPLETED';
         el.qcScoreBadge.className = 'badge score-badge-green';
 
       } catch (error) {
         console.error("Research Tool Failure:", error);
         clearInterval(logInterval);
+        
+        // Hide dashboard if failed before showing chunks, or print log
+        researchResultsDashboard.classList.add('hidden');
+        researchLoadingState.classList.remove('hidden');
         
         const errLine = document.createElement('div');
         errLine.className = 'log-line';
@@ -1927,6 +1924,119 @@
         btnRunResearch.removeAttribute('disabled');
       }
     });
+
+    // Helper: Stream JSON array buffer parser
+    function parseStreamChunks(bufferStr) {
+      let text = "";
+      let cleaned = bufferStr.trim();
+      if (cleaned.startsWith('[')) {
+        cleaned = cleaned.substring(1).trim();
+      }
+      if (cleaned.endsWith(']')) {
+        cleaned = cleaned.substring(0, cleaned.length - 1).trim();
+      }
+      
+      let objStrings = [];
+      let braceCount = 0;
+      let startIdx = 0;
+      let inString = false;
+      let escapeActive = false;
+      
+      for (let i = 0; i < cleaned.length; i++) {
+        const char = cleaned[i];
+        
+        if (escapeActive) {
+          escapeActive = false;
+          continue;
+        }
+        if (char === '\\') {
+          escapeActive = true;
+          continue;
+        }
+        
+        if (char === '"') {
+          inString = !inString;
+        }
+        
+        if (!inString) {
+          if (char === '{') {
+            if (braceCount === 0) {
+              startIdx = i;
+            }
+            braceCount++;
+          } else if (char === '}') {
+            braceCount--;
+            if (braceCount === 0) {
+              objStrings.push(cleaned.substring(startIdx, i + 1));
+            }
+          }
+        }
+      }
+      
+      objStrings.forEach(objStr => {
+        try {
+          let cleanObjStr = objStr.trim();
+          if (cleanObjStr.endsWith(',')) {
+            cleanObjStr = cleanObjStr.substring(0, cleanObjStr.length - 1).trim();
+          }
+          const obj = JSON.parse(cleanObjStr);
+          const chunkText = obj.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (chunkText) {
+            text += chunkText;
+          }
+        } catch (e) {
+          // Ignore parsing errors for incomplete JSON chunk
+        }
+      });
+      
+      return text;
+    }
+
+    // Helper: Render partial or complete report data
+    function renderResearchReportData(parsedReport, selectedModel, topic, industry) {
+      const renderOrLoader = (content, formatFn, placeholder) => {
+        if (content && content.trim().length > 0) {
+          return formatFn(content);
+        } else {
+          return `
+            <div class="shimmer-loader" style="display: flex; align-items: center; gap: 8px; color: var(--text-muted); padding: 12px 16px; border: 1px dashed rgba(13, 12, 27, 0.05); border-radius: var(--border-radius-sm); background: rgba(255,255,255,0.1);">
+              <span class="hud-pulse-dot" style="width: 6px; height: 6px; border-radius: 50%; display: inline-block; background: var(--accent-purple); box-shadow: 0 0 8px var(--accent-purple); animation: pulseGlow 1.5s infinite alternate;"></span>
+              <span style="font-family: var(--font-mono); font-size: 10px; font-weight: 500; letter-spacing: 0.05em; color: var(--text-secondary); animation: pulseOpacity 1.2s infinite alternate;">${placeholder}</span>
+            </div>
+          `;
+        }
+      };
+
+      // Set defaults for empty states
+      const linkedin = parsedReport.linkedin || {};
+      const meta = parsedReport.meta || {};
+      const x = parsedReport.x || {};
+      const print = parsedReport.print || {};
+
+      // Render LinkedIn Grid
+      researchLinkedInTraction.innerHTML = renderOrLoader(linkedin.traction, formatMarkdownToHTML, "CRAWLING TRACTION TOPICS...");
+      researchLinkedInFormulas.innerHTML = renderOrLoader(linkedin.formulas, formatPostFormulasToHTML, "COMPILING COPY BLUEPRINTS...");
+      researchLinkedInKeywords.innerHTML = renderOrLoader(linkedin.keywords, formatKeywordsToHTML, "EXTRACTING TARGET HASHTAGS...");
+      researchLinkedInPlan.innerHTML = renderOrLoader(linkedin.plan, formatMarkdownToHTML, "FORMULATING LINKEDIN STRATEGY...");
+
+      // Render Meta Grid
+      researchMetaTraction.innerHTML = renderOrLoader(meta.traction, formatMarkdownToHTML, "ANALYZING META FORMATS...");
+      researchMetaFormulas.innerHTML = renderOrLoader(meta.formulas, formatPostFormulasToHTML, "EXTRACTING VIDEO HOOKS...");
+      researchMetaKeywords.innerHTML = renderOrLoader(meta.keywords, formatKeywordsToHTML, "COMPILING TARGETING OPTIONS...");
+      researchMetaPlan.innerHTML = renderOrLoader(meta.plan, formatMarkdownToHTML, "FORMULATING META STRATEGY...");
+
+      // Render X Grid
+      researchXTraction.innerHTML = renderOrLoader(x.traction, formatMarkdownToHTML, "RETRIEVING TWEET TRENDS...");
+      researchXFormulas.innerHTML = renderOrLoader(x.formulas, formatPostFormulasToHTML, "COMPILING THREAD BLUEPRINTS...");
+      researchXKeywords.innerHTML = renderOrLoader(x.keywords, formatKeywordsToHTML, "FILTERING TAG INTENSITY...");
+      researchXPlan.innerHTML = renderOrLoader(x.plan, formatMarkdownToHTML, "FORMULATING X ENGAGEMENT PLAN...");
+
+      // Render Print Grid
+      researchPrintTraction.innerHTML = renderOrLoader(print.traction, formatMarkdownToHTML, "RETRIEVING PRINT BLUEPRINTS...");
+      researchPrintFormulas.innerHTML = renderOrLoader(print.formulas, formatPostFormulasToHTML, "ANALYZING COPY HOOKS...");
+      researchPrintKeywords.innerHTML = renderOrLoader(print.keywords, formatKeywordsToHTML, "COMPILING FONT WEIGHTS...");
+      researchPrintPlan.innerHTML = renderOrLoader(print.plan, formatMarkdownToHTML, "FORMULATING PRINT STRATEGY...");
+    }
   }
 
   function parseResearchReport(text) {
@@ -1957,7 +2067,15 @@
       if (startIdx === -1) return '';
       const start = startIdx + marker.length;
       const end = nextMarker ? text.indexOf(nextMarker) : text.length;
-      return text.substring(start, end === -1 ? text.length : end).trim();
+      let block = text.substring(start, end === -1 ? text.length : end).trim();
+      
+      // Clean up trailing platform indicators/headers (e.g. -- META --- or ### X (Twitter))
+      block = block
+        .replace(/\s*--+\s*[a-zA-Z\s\(\)\/\-]+\s*--+\s*$/gi, '')
+        .replace(/\s*#+\s*[a-zA-Z\s\(\)\/\-]+$/gi, '')
+        .trim();
+        
+      return block;
     };
 
     return {
